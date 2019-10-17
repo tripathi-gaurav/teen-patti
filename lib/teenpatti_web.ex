@@ -23,6 +23,7 @@ defmodule TeenpattiWeb do
       import Plug.Conn
       import TeenpattiWeb.Router.Helpers
       import TeenpattiWeb.Gettext
+      alias TeenpattiWeb.Router.Helpers, as: Routes
     end
   end
 
@@ -40,6 +41,7 @@ defmodule TeenpattiWeb do
       import TeenpattiWeb.Router.Helpers
       import TeenpattiWeb.ErrorHelpers
       import TeenpattiWeb.Gettext
+      alias TeenpattiWeb.Router.Helpers, as: Routes
     end
   end
 

@@ -3,6 +3,7 @@ defmodule TeenpattiWeb.UserSocket do
 
   ## Channels
   # channel "room:*", TeenpattiWeb.RoomChannel
+ channel "game:*", TeenpattiWeb.GameChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
