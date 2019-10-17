@@ -1,0 +1,16 @@
+[Unit]
+Description=Teen Patti Game
+
+[Service]
+Type=simple
+User=teenpatti
+Group=teenpatti
+Restart=on-failure
+Environment=MIX_ENV=prod "PORT=4793"
+Environment=LANG=en_US.UTF-8
+
+WorkingDirectory=/home/teenpatti/teen-patti/
+ExecStart=/home/teenpatti/teen-patti/start.sh
+
+[Install]
+WantedBy=multi-user.target
