@@ -26,7 +26,14 @@ constructor(props) {
 	isShow: false,
 	isFoldPlayer1: false,
 	isFoldPlayer2: false,
-	isGameActive: false
+	isGameActive: false,
+	isBetPlayer1: false,
+	isBetPlayer2: false,
+	isBlindPlayer1: false,
+	isBlindPlayer2: false,
+	isSeenPlayer1: false,
+	isSeenPlayer2: false,
+	turn: 0
     };  
   
 
@@ -100,6 +107,9 @@ render() {
 	       <button className = "hand3"></button>
 	       <button className = "money">Amount: {this.state.moneyPlayer1}</button>
 	       <button className = "fold">Fold</button>
+	       <button className = "bet">Bet</button>
+	       <button className = "blind">Play Blind</button>
+	       <button className = "seen">Play Seen</button>
 	   </div>
 	   <div className = "player2">
                <p>Name: {player2Name}</p>
@@ -108,6 +118,9 @@ render() {
 	       <button className = "hand3"></button>
 	       <button className = "money">Amount: {this.state.moneyPlayer2}</button>
 	       <button className = "fold">Fold</button>
+	       <button className = "bet">Bet</button>
+	       <button className = "blind">Play Blind</button>
+	       <button className = "seen">Play Seen</button>
 	   </div>
 	   <div className = "show">
                <button className = "show">Show</button><br />
