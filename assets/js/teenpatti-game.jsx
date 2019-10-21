@@ -29,11 +29,13 @@ constructor(props) {
 	isGameActive: false,
 	isBetPlayer1: false,
 	isBetPlayer2: false,
-	isBlindPlayer1: false,
-	isBlindPlayer2: false,
 	isSeenPlayer1: false,
 	isSeenPlayer2: false,
-	turn: 0
+	turn: 0,
+	betValuePlayer1: 0,
+	betValuePlayer2: 0,
+	message1: "",
+	message2: ""
     };  
   
 
@@ -60,10 +62,13 @@ handleChange(value) {
 }
 
 onClickJoinGameButton() {
-
 this.channel.push("join_game", {userName: this.state.userName})
                    .receive("ok", resp => {this.got_view(resp);});
+}
 
+startGame() {
+   this.channel.push("start_game", {})
+                   .receive("ok", resp => {this.got_view(resp);});
 }
 
 
@@ -98,29 +103,34 @@ render() {
 
        <div className = "board">
 	   <div class = "start">
-               <button className = "start">Start Game</button><br /> 
+               <button className = "start" onClick={() => this.startGame()}>Start Game</button><br /> 
 	   </div>
            <div className = "player1">
 	       <p>Name: {player1Name}</p>
+	       <p>Money: {this.state.moneyPlayer1}</p>
 	       <button className = "hand1"></button>
 	       <button className = "hand2"></button>
 	       <button className = "hand3"></button>
 	       <button className = "money">Amount: {this.state.moneyPlayer1}</button>
 	       <button className = "fold">Fold</button>
-	       <button className = "bet">Bet</button>
-	       <button className = "blind">Play Blind</button>
-	       <button className = "seen">Play Seen</button>
+	       <button className = "seen">Play Seen</button><br />
+	       <input id = "tb2" type = "text" value = {this.state.betValuePlayer1} onChange={(e) =>this.handleBetForPlayer1(e.target.value)}/><br />
+	       <button className = "bet">Bet</button><br />
+	       <p>{this.state.message1}</p>
 	   </div>
+	   <hr />
 	   <div className = "player2">
                <p>Name: {player2Name}</p>
+	       <p>Money: {this.state.moneyPlayer2}</p>
 	       <button className = "hand1"></button>
 	       <button className = "hand2"></button>
 	       <button className = "hand3"></button>
 	       <button className = "money">Amount: {this.state.moneyPlayer2}</button>
 	       <button className = "fold">Fold</button>
-	       <button className = "bet">Bet</button>
-	       <button className = "blind">Play Blind</button>
 	       <button className = "seen">Play Seen</button>
+	       <input id = "tb3" type = "text" value = {this.state.betValuePlayer2} onChange={(e) =>this.handleBetForPlayer2(e.target.value)}/><br />
+	       <button className = "bet">Bet</button>
+	       <p>{this.state.message2}</p>
 	   </div>
 	   <div className = "show">
                <button className = "show">Show</button><br />

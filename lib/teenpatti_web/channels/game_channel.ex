@@ -26,6 +26,15 @@ def handle_in("join_game", %{"userName" => userName}, socket) do
     {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
 end  
 
+def handle_in("start_game", %{}, socket) do
+    gameName = socket.assigns[:gameName]
+    game = Game.start_game(socket.assigns[:game])
+    socket = assign(socket, :game, game)
+    BackupAgent.put(gameName, game)
+    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+end
+
+
 defp authorized?( _payload ) do
         true
 end
