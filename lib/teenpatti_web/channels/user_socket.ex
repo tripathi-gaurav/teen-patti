@@ -2,7 +2,6 @@ defmodule TeenpattiWeb.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  # channel "room:*", TeenpattiWeb.RoomChannel
  channel "game:*", TeenpattiWeb.GameChannel
 
   ## Transports

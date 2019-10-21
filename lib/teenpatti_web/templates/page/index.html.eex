@@ -1,7 +1,7 @@
 <div id="teenpatti_game">
-         <h2>Welcome to My Teen Patti Table</h2><br/><br/>
+         <h2>Welcome to Teen Patti Table!</h2><br/><br/>
          <%= form_for @conn, "/game", fn f -> %>
-             <p>Enter your name: <%= text_input f, :gameName %></p>
+             <p>Enter game name: <%= text_input f, :gameName %></p>
              <p><%= submit "Join Game" %></p>
          <% end %>
 </div>

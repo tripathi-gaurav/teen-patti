@@ -1,29 +1,29 @@
 defmodule Teenpatti.Application do
-  use Application
-
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
-  def start(_type, _args) do
-    import Supervisor.Spec
-
-    # Define workers and child supervisors to be supervised
-    children = [
-      # Start the endpoint when the application starts
-      supervisor(TeenpattiWeb.Endpoint, []),
-      # Start your own worker by calling: Teenpatti.Worker.start_link(arg1, arg2, arg3)
-      # worker(Teenpatti.Worker, [arg1, arg2, arg3]),
-    ]
-
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Teenpatti.Supervisor]
-    Supervisor.start_link(children, opts)
-  end
-
-  # Tell Phoenix to update the endpoint configuration
-  # whenever the application is updated.
-  def config_change(changed, _new, removed) do
-    TeenpattiWeb.Endpoint.config_change(changed, removed)
-    :ok
-  end
+   # See https://hexdocs.pm/elixir/Application.html
+   # for more information on OTP Applications
+   @moduledoc false
+ 
+   use Application 
+    def start(_type, _args) do
+      # List all child processes to be supervised
+      children = [
+        # Start the endpoint when the application starts
+        TeenpattiWeb.Endpoint,
+        # Starts a worker by calling: Teenpatti.Worker.start_link(arg)
+        # {Teenpatti.Worker, arg},
+        Teenpatti.BackupAgent,
+      ]
+  
+      # See https://hexdocs.pm/elixir/Supervisor.html
+      # for other strategies and supported options
+      opts = [strategy: :one_for_one, name: Teenpatti.Supervisor]
+      Supervisor.start_link(children, opts)
+    end
+  
+    # Tell Phoenix to update the endpoint configuration
+    # whenever the application is updated.
+    def config_change(changed, _new, removed) do
+      TeenpattiWeb.Endpoint.config_change(changed, removed)
+      :ok
+    end
 end
