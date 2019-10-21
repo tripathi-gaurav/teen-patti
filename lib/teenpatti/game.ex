@@ -13,7 +13,14 @@ def new do
        isShow: false,
        isFoldPlayer1: false,
        isFoldPlayer2: false,
-       isGameActive: false
+       isGameActive: false,
+       isBetPlayer1: false,
+       isBetPlayer2: false,
+       isBlindPlayer1: false,
+       isBlindPlayer2: false,
+       isSeenPlayer1: false,
+       isSeenPlayer2: false,
+       turn: 0
     }
 end
 
@@ -32,7 +39,14 @@ def addUserToMap(game, userName) do
              isShow: game.isShow,
              isFoldPlayer1: game.isFoldPlayer1,
              isFoldPlayer2: game.isFoldPlayer2,
-             isGameActive: game.isGameActive 
+             isGameActive: game.isGameActive,
+             isBetPlayer1: game.isBetPlayer1,
+             isBetPlayer2: game.isBetPlayer2,
+             isBlindPlayer1: game.isBlindPlayer1,
+             isBlindPlayer2: game.isBlindPlayer2,
+             isSeenPlayer1: game.isSeenPlayer1,
+             isSeenPlayer2: game.isSeenPlayer2,
+             turn: game.turn 
            }
      else
           game
@@ -52,7 +66,14 @@ def client_view(game) do
       isShow: game.isShow,
       isFoldPlayer1: game.isFoldPlayer1,
       isFoldPlayer2: game.isFoldPlayer2,
-      isGameActive: game.isGameActive
+      isGameActive: game.isGameActive,
+      isBetPlayer1: game.isBetPlayer1,
+      isBetPlayer2: game.isBetPlayer2,
+      isBlindPlayer1: game.isBlindPlayer1,
+      isBlindPlayer2: game.isBlindPlayer2,
+      isSeenPlayer1: game.isSeenPlayer1,
+      isSeenPlayer2: game.isSeenPlayer2,
+      turn: game.turn
     }
 end
 
