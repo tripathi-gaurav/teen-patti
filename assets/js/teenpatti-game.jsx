@@ -80,9 +80,10 @@ startGame() {
 }
 
 onClickSeen() {
-   this.channel.push("change_seen", {turn: this.state.turn})
+       this.channel.push("change_seen", {turn: this.state.turn})
                    .receive("ok", resp => {this.got_view(resp);});
-
+       this.channel.push("assign_cards", {turn: this.state.turn})
+                   .receive("ok", resp => {this.got_view(resp);});
 }
 
 onClickBet() {
@@ -113,6 +114,28 @@ onClickBet() {
 		 }
 	 }
   }
+}
+
+onClickFold() {
+
+
+
+}
+	  
+handValue(index, turn) {
+    if(this.state.handForPlayer1.length == 0) {
+        return ("");
+    }
+    if(this.state.isSeenPlayer1 && turn == 1) {
+        return (this.state.handForPlayer1[index].value + " : " + this.state.handForPlayer1[index].type);
+    }
+    if(this.state.handForPlayer2.length == 0) {
+        return ("");
+    }
+    if(this.state.isSeenPlayer2 && turn == 2) {
+        return (this.state.handForPlayer2[index].value + " : " + this.state.handForPlayer2[index].type);
+    }
+    return ("");
 }
 
 
@@ -153,11 +176,11 @@ render() {
            <div className = "player1">
 	       <p>Name: {player1Name}</p>
 	       <p>Money: {this.state.moneyPlayer1}</p>
-	       <button className = "hand1"></button>
-	       <button className = "hand2"></button>
-	       <button className = "hand3"></button>
+	       <button className = "hand1">{this.handValue(0,1)}</button>
+	       <button className = "hand2">{this.handValue(1,1)}</button>
+	       <button className = "hand3">{this.handValue(2,1)}</button>
 	       <button className = "money">Amount: {this.state.moneyPlayer1}</button>
-	       <button className = "fold">Fold</button>
+	       <button className = "fold" onClick={() => this.onClickFold()}>Fold</button>
 	       <button className = "seen" onClick={() => this.onClickSeen()}>Play Seen</button><br />
 	       <input id = "tb2" type = "text" value = {this.state.betValuePlayer1} onChange={(e) => this.handleBetForPlayer1(e.target.value)}/><br />
 	       <button className = "bet" onClick={() => this.onClickBet()}>Bet</button><br />
@@ -167,11 +190,11 @@ render() {
 	   <div className = "player2">
                <p>Name: {player2Name}</p>
 	       <p>Money: {this.state.moneyPlayer2}</p>
-	       <button className = "hand1"></button>
-	       <button className = "hand2"></button>
-	       <button className = "hand3"></button>
+	       <button className = "hand1">{this.handValue(0,2)}</button>
+	       <button className = "hand2">{this.handValue(1,2)}</button>
+	       <button className = "hand3">{this.handValue(2,2)}</button>
 	       <button className = "money">Amount: {this.state.moneyPlayer2}</button>
-	       <button className = "fold">Fold</button>
+	       <button className = "fold" onClick={() => this.onClickFold()}>Fold</button>
 	       <button className = "seen" onClick={() => this.onClickSeen()}>Play Seen</button>
 	       <input id = "tb3" type = "text" value = {this.state.betValuePlayer2} onChange={(e) =>this.handleBetForPlayer2(e.target.value)}/><br />
 	       <button className = "bet" onClick={() => this.onClickBet()}>Bet</button>

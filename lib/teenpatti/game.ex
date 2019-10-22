@@ -212,6 +212,113 @@ def onClickBetBlind(game, turn, betValue) do
     end
 end
 
+def changeSeen(game, turn) do
+    if(turn == 1) do
+     %{
+      userName: "",
+      listOfUsers: game.listOfUsers,
+      potMoney: game.potMoney,
+      currentStakeAmount: game.currentStakeAmount,
+      handForPlayer1: game.handForPlayer1,
+      handForPlayer2: game.handForPlayer2,
+      moneyPlayer1: game.moneyPlayer1,
+      moneyPlayer2: game.moneyPlayer2,
+      isShow: game.isShow,
+      isFoldPlayer1: game.isFoldPlayer1,
+      isFoldPlayer2: game.isFoldPlayer2,
+      isGameActive: true,
+      isBetPlayer1: true,
+      isBetPlayer2: game.isBetPlayer2,
+      isSeenPlayer1: true,
+      isSeenPlayer2: game.isSeenPlayer2,
+      turn: 1,
+      betValuePlayer1: game.betValuePlayer1,
+      betValuePlayer2: game.betValuePlayer2,
+      message1: game.message1,
+      message2: game.message2
+    }
+    else
+    %{
+      userName: "",
+      listOfUsers: game.listOfUsers,
+      potMoney: game.potMoney,
+      currentStakeAmount: game.currentStakeAmount,
+      handForPlayer1: game.handForPlayer1,
+      handForPlayer2: game.handForPlayer2,
+      moneyPlayer1: game.moneyPlayer1,
+      moneyPlayer2: game.moneyPlayer2,
+      isShow: game.isShow,
+      isFoldPlayer1: game.isFoldPlayer1,
+      isFoldPlayer2: game.isFoldPlayer2,
+      isGameActive: true,
+      isBetPlayer1: game.isBetPlayer1,
+      isBetPlayer2: true,
+      isSeenPlayer1: game.isSeenPlayer1,
+      isSeenPlayer2: true,
+      turn: 2,
+      betValuePlayer1: game.betValuePlayer1,
+      betValuePlayer2: game.betValuePlayer2,
+      message1: game.message1,
+      message2: game.message2
+    }
+    end
+end
+
+def assignCards(game, turn) do 
+     listOfMapOfCards = getListOfCards()
+     if turn == 1 do
+          handForPlayer1 = Enum.slice(listOfMapOfCards, 0..2)
+           %{
+              userName: "",
+              listOfUsers: game.listOfUsers,
+              potMoney: game.potMoney,
+              currentStakeAmount: game.currentStakeAmount,
+              handForPlayer1: handForPlayer1,
+              handForPlayer2: game.handForPlayer2,
+              moneyPlayer1: game.moneyPlayer1,
+              moneyPlayer2: game.moneyPlayer2,
+              isShow: game.isShow,
+              isFoldPlayer1: game.isFoldPlayer1,
+              isFoldPlayer2: game.isFoldPlayer2,
+              isGameActive: game.isGameActive,
+              isBetPlayer1: game.isBetPlayer1,
+              isBetPlayer2: game.isBetPlayer2,
+              isSeenPlayer1: game.isSeenPlayer1,
+              isSeenPlayer2: game.isSeenPlayer2,
+              turn: game.turn,
+              betValuePlayer1: game.betValuePlayer1,
+              betValuePlayer2: game.betValuePlayer2,
+              message1: game.message1,
+              message2: game.message2
+     }
+     else
+          handForPlayer2 = Enum.slice(listOfMapOfCards, 3..5)
+           %{
+              userName: "",
+              listOfUsers: game.listOfUsers,
+              potMoney: game.potMoney,
+              currentStakeAmount: game.currentStakeAmount,
+              handForPlayer1: game.handForPlayer1,
+              handForPlayer2: handForPlayer2,
+              moneyPlayer1: game.moneyPlayer1,
+              moneyPlayer2: game.moneyPlayer2,
+              isShow: game.isShow,
+              isFoldPlayer1: game.isFoldPlayer1,
+              isFoldPlayer2: game.isFoldPlayer2,
+              isGameActive: game.isGameActive,
+              isBetPlayer1: game.isBetPlayer1,
+              isBetPlayer2: game.isBetPlayer2,
+              isSeenPlayer1: game.isSeenPlayer1,
+              isSeenPlayer2: game.isSeenPlayer2,
+              turn: game.turn,
+              betValuePlayer1: game.betValuePlayer1,
+              betValuePlayer2: game.betValuePlayer2,
+              message1: game.message1,
+              message2: game.message2
+            }
+    end
+end
+
 def client_view(game) do
     %{
       userName: "",
