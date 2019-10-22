@@ -61,6 +61,14 @@ handleChange(value) {
      this.setState({userName: value});
 }
 
+handleBetForPlayer1(value) {
+     this.setState({betValuePlayer1: parseInt(value)});
+}
+
+handleBetForPlayer2(value) {
+     this.setState({betValuePlayer2: parseInt(value)});
+}
+
 onClickJoinGameButton() {
 this.channel.push("join_game", {userName: this.state.userName})
                    .receive("ok", resp => {this.got_view(resp);});
@@ -70,6 +78,43 @@ startGame() {
    this.channel.push("start_game", {})
                    .receive("ok", resp => {this.got_view(resp);});
 }
+
+onClickSeen() {
+   this.channel.push("change_seen", {turn: this.state.turn})
+                   .receive("ok", resp => {this.got_view(resp);});
+
+}
+
+onClickBet() {
+  if(this.state.turn == 1 && this.state.isBetPlayer1) {
+         if(this.state.isSeenPlayer1) { 
+		 if(this.state.betValuePlayer1 >= 2*this.state.currentStakeAmount && this.state.betValuePlayer1 <= 4*this.state.currentStakeAmount) {
+                             this.channel.push("click_bet_seen", {turn: this.state.turn, betValue: this.state.betValuePlayer1})
+                       .receive("ok", resp => {this.got_view(resp);});
+		 }
+	 } else {
+                if(this.state.betValuePlayer1 >= this.state.currentStakeAmount && this.state.betValuePlayer1 <= 2*this.state.currentStakeAmount) {
+                             this.channel.push("click_bet_blind", {turn: this.state.turn, betValue: this.state.betValuePlayer1})
+                   .receive("ok", resp => {this.got_view(resp);});
+		}
+	 }
+  }
+  if(this.state.turn == 2 && this.state.isBetPlayer2) {
+         if(this.state.isSeenPlayer2) {
+                 if(this.state.betValuePlayer2 >= 2*this.state.currentStakeAmount && this.state.betValuePlayer2 <= 4*this.state.currentStakeAmount) {
+                             this.channel.push("click_bet_seen", {turn: this.state.turn, betValue: this.state.betValuePlayer2})
+                   .receive("ok", resp => {this.got_view(resp);});
+
+		 }
+	 } else {
+                 if(this.state.betValuePlayer2 >= this.state.currentStakeAmount && this.state.betValuePlayer2 <= 2*this.state.currentStakeAmount) {
+                             this.channel.push("click_bet_blind", {turn: this.state.turn, betValue: this.state.betValuePlayer2})
+                   .receive("ok", resp => {this.got_view(resp);});
+		 }
+	 }
+  }
+}
+
 
 
 render() {
@@ -94,7 +139,7 @@ render() {
 	
        <div className = "mainboard">
 
-       <div className="userList">
+       <div className = "userList">
 
            Enter Your Name:  <input id = "tb1" type = "text" value = {this.state.userName} onChange={(e) =>this.handleChange(e.target.value)}/>
 	   <button className = "b1" onClick={() => this.onClickJoinGameButton()}>Join {window.gameName}</button>
@@ -113,9 +158,9 @@ render() {
 	       <button className = "hand3"></button>
 	       <button className = "money">Amount: {this.state.moneyPlayer1}</button>
 	       <button className = "fold">Fold</button>
-	       <button className = "seen">Play Seen</button><br />
-	       <input id = "tb2" type = "text" value = {this.state.betValuePlayer1} onChange={(e) =>this.handleBetForPlayer1(e.target.value)}/><br />
-	       <button className = "bet">Bet</button><br />
+	       <button className = "seen" onClick={() => this.onClickSeen()}>Play Seen</button><br />
+	       <input id = "tb2" type = "text" value = {this.state.betValuePlayer1} onChange={(e) => this.handleBetForPlayer1(e.target.value)}/><br />
+	       <button className = "bet" onClick={() => this.onClickBet()}>Bet</button><br />
 	       <p>{this.state.message1}</p>
 	   </div>
 	   <hr />
@@ -127,9 +172,9 @@ render() {
 	       <button className = "hand3"></button>
 	       <button className = "money">Amount: {this.state.moneyPlayer2}</button>
 	       <button className = "fold">Fold</button>
-	       <button className = "seen">Play Seen</button>
+	       <button className = "seen" onClick={() => this.onClickSeen()}>Play Seen</button>
 	       <input id = "tb3" type = "text" value = {this.state.betValuePlayer2} onChange={(e) =>this.handleBetForPlayer2(e.target.value)}/><br />
-	       <button className = "bet">Bet</button>
+	       <button className = "bet" onClick={() => this.onClickBet()}>Bet</button>
 	       <p>{this.state.message2}</p>
 	   </div>
 	   <div className = "show">

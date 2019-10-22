@@ -34,6 +34,21 @@ def handle_in("start_game", %{}, socket) do
     {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
 end
 
+def handle_in("click_bet_seen", %{"turn" => turn, "betValue" => betValue}, socket) do
+    gameName = socket.assigns[:gameName]
+    game = Game.onClickBetSeen(socket.assigns[:game], turn, betValue)
+    socket = assign(socket, :game, game)
+    BackupAgent.put(gameName, game)
+    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+end
+
+def handle_in("click_bet_blind", %{"turn" => turn, "betValue" => betValue}, socket) do
+    gameName = socket.assigns[:gameName]
+    game = Game.onClickBetBlind(socket.assigns[:game], turn, betValue)
+    socket = assign(socket, :game, game)
+    BackupAgent.put(gameName, game)
+    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+end
 
 defp authorized?( _payload ) do
         true
