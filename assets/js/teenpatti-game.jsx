@@ -117,9 +117,8 @@ onClickBet() {
 }
 
 onClickFold() {
-
-
-
+        this.channel.push("click_fold", {turn: this.state.turn})
+                   .receive("ok", resp => {this.got_view(resp);});
 }
 	  
 handValue(index, turn) {

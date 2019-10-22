@@ -264,6 +264,58 @@ def changeSeen(game, turn) do
     end
 end
 
+def click_fold(game, turn) do
+   if turn == 1 do
+    %{
+      userName: "",
+      listOfUsers: game.listOfUsers,
+      potMoney: 0,
+      currentStakeAmount: game.currentStakeAmount,
+      handForPlayer1: game.handForPlayer1,
+      handForPlayer2: game.handForPlayer2,
+      moneyPlayer1: game.moneyPlayer1,
+      moneyPlayer2: game.moneyPlayer2 + game.potMoney,
+      isShow: game.isShow,
+      isFoldPlayer1: game.isFoldPlayer1,
+      isFoldPlayer2: game.isFoldPlayer2,
+      isGameActive: game.isGameActive,
+      isBetPlayer1: game.isBetPlayer1,
+      isBetPlayer2: game.isBetPlayer2,
+      isSeenPlayer1: game.isSeenPlayer1,
+      isSeenPlayer2: game.isSeenPlayer2,
+      turn: 0,
+      betValuePlayer1: game.betValuePlayer1,
+      betValuePlayer2: game.betValuePlayer2,
+      message1: game.message1,
+      message2: "Congratulations! You won this round!"
+    }
+   else
+       %{
+      userName: "",
+      listOfUsers: game.listOfUsers,
+      potMoney: 0,
+      currentStakeAmount: game.currentStakeAmount,
+      handForPlayer1: game.handForPlayer1,
+      handForPlayer2: game.handForPlayer2,
+      moneyPlayer1: game.moneyPlayer1 + game.potMoney,
+      moneyPlayer2: game.moneyPlayer2,
+      isShow: game.isShow,
+      isFoldPlayer1: game.isFoldPlayer1,
+      isFoldPlayer2: game.isFoldPlayer2,
+      isGameActive: game.isGameActive,
+      isBetPlayer1: game.isBetPlayer1,
+      isBetPlayer2: game.isBetPlayer2,
+      isSeenPlayer1: game.isSeenPlayer1,
+      isSeenPlayer2: game.isSeenPlayer2,
+      turn: 0,
+      betValuePlayer1: game.betValuePlayer1,
+      betValuePlayer2: game.betValuePlayer2,
+      message1: "Congratulations! You won the round!",
+      message2: game.message2
+    }   
+   end
+end
+
 def assignCards(game, turn) do 
      listOfMapOfCards = getListOfCards()
      if turn == 1 do
