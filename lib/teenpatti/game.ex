@@ -851,7 +851,7 @@ end
 def assign_cards_to_blind(handForPlayer) do
 
      listOfMapOfCards = getListOfCards()
-     if(length(handForPlayer != 0)) do
+     if(length(handForPlayer) != 0) do
              handForPlayer
      end
      handForPlayer = Enum.slice(listOfMapOfCards, 3..5)
