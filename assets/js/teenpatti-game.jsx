@@ -137,6 +137,32 @@ handValue(index, turn) {
     return ("");
 }
 
+onClickShow() {
+      if(!this.state.isShow && this.state.listOfUsers == 2) {
+	        console.log("2");
+                this.channel.push("change_show", {turn: this.state.turn})
+                         .receive("ok", resp => {this.got_view(resp);});
+	        if(this.state.turn == 1) {
+                      if(this.state.isSeenPlayer1) {
+			   console.log(1);
+                           this.channel.push("evaluate_show_seen", {turn: this.state.turn})
+                                         .receive("ok", resp => {this.got_view(resp);});
+		      } else {
+                           this.channel.push("evaluate_show_blind", {turn: this.state.turn})
+                                         .receive("ok", resp => {this.got_view(resp);});
+		      }
+
+		} else {
+                     if(this.state.isSeenPlayer2) {
+                           this.channel.push("evaluate_show_seen", {turn: this.state.turn})
+                                         .receive("ok", resp => {this.got_view(resp);});
+		     } else {
+                           this.channel.push("evaluate_show_blind", {turn: this.state.turn})
+                                         .receive("ok", resp => {this.got_view(resp);});
+		     }
+		}
+      }
+}
 
 
 render() {
@@ -200,7 +226,7 @@ render() {
 	       <p>{this.state.message2}</p>
 	   </div>
 	   <div className = "show">
-               <button className = "show">Show</button><br />
+               <button className = "show" onClick={() => this.onClickShow()}>Show</button><br />
 	   </div>	   
 	   <div className = "potAmount">
                <p>Pot Amount: {this.state.potMoney}</p>
