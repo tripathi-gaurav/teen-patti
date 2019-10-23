@@ -138,13 +138,11 @@ handValue(index, turn) {
 }
 
 onClickShow() {
-      if(!this.state.isShow && this.state.listOfUsers == 2) {
-	        console.log("2");
+      if(!this.state.isShow && this.state.listOfUsers.length == 2) {
                 this.channel.push("change_show", {turn: this.state.turn})
                          .receive("ok", resp => {this.got_view(resp);});
 	        if(this.state.turn == 1) {
-                      if(this.state.isSeenPlayer1) {
-			   console.log(1);
+                      if(this.state.isSeenPlayer1){
                            this.channel.push("evaluate_show_seen", {turn: this.state.turn})
                                          .receive("ok", resp => {this.got_view(resp);});
 		      } else {
