@@ -849,19 +849,18 @@ end
 
 
 def assign_cards_to_blind(handForPlayer) do
-
-     listOfMapOfCards = getListOfCards()
      if(length(handForPlayer) != 0) do
              handForPlayer
      end
+     listOfMapOfCards = getListOfCards()
      handForPlayer = Enum.slice(listOfMapOfCards, 3..5)
      handForPlayer
 end
 
 
 def evaluate_show_seen(game, turn) do
-   message = check_winner(game.handForPlayer1, game.handForPlayer2)
    handForPlayer2 = assign_cards_to_blind(game.handForPlayer2)
+   message = check_winner(game.handForPlayer1, handForPlayer2)
    if(turn == 1) do
      %{
       userName: "",
@@ -915,9 +914,9 @@ def evaluate_show_seen(game, turn) do
 end
 
 def evaluate_show_blind(game, turn) do
-     message = check_winner(game.handForPlayer1, game.handForPlayer2)
      handForPlayer2 = assign_cards_to_blind(game.handForPlayer2)
      handForPlayer1 = assign_cards_to_blind(game.handForPlayer2)
+     message = check_winner(handForPlayer1, handForPlayer2)
      if(turn == 1) do
      %{
       userName: "",
