@@ -915,7 +915,7 @@ end
 
 def evaluate_show_blind(game, turn) do
      handForPlayer2 = assign_cards_to_blind(game.handForPlayer2)
-     handForPlayer1 = assign_cards_to_blind(game.handForPlayer2)
+     handForPlayer1 = assign_cards_to_blind(game.handForPlayer1)
      message = check_winner(handForPlayer1, handForPlayer2)
      if(turn == 1) do
      %{
