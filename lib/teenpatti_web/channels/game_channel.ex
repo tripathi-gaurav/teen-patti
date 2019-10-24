@@ -22,8 +22,10 @@ def handle_in("join_game", %{"userName" => userName}, socket) do
     gameName = socket.assigns[:gameName]
     game = Game.addUserToMap(socket.assigns[:game], userName)
     socket = assign(socket, :game, game)
+    #IO.inspect game
+    #IO.inspect Game.client_view(game, game.userName)
     BackupAgent.put(gameName, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+    {:reply, {:ok, %{"game" => Game.client_view(game, game.userName)}}, socket}
 end  
 
 def handle_in("start_game", %{}, socket) do
@@ -31,6 +33,7 @@ def handle_in("start_game", %{}, socket) do
     game = Game.start_game(socket.assigns[:game])
     socket = assign(socket, :game, game)
     BackupAgent.put(gameName, game)
+    
     {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
 end
 
@@ -61,6 +64,7 @@ end
 def handle_in("click_bet_blind", %{"turn" => turn, "betValue" => betValue}, socket) do
     gameName = socket.assigns[:gameName]
     game = Game.onClickBetBlind(socket.assigns[:game], turn, betValue)
+    IO.inspect game
     socket = assign(socket, :game, game)
     BackupAgent.put(gameName, game)
     {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}

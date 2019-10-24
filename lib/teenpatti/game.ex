@@ -26,16 +26,35 @@ def new do
        message1: "",
        message2: "",
        player: %Player{},
-       players: []
+       players: %{},
+	   listOfPlayers: []
     }
 end
 
 def addUserToMap(game, userName) do
      if(length(game.listOfUsers) != 5) do
           listUsers = game.listOfUsers ++ [userName]
-          players = game.players
-          players = players ++ [ %Player{user_name: userName} ]
-          %{game | listOfUsers: listUsers }
+          
+		  #generate a unique session id for user
+		  rand = :rand.uniform(65535)
+		  current_time = :os.system_time(:millisecond)
+		  key = "#{current_time}supersecretsalt#{rand}"
+		  session_id = :crypto.hmac(:sha256, key, userName) |> Base.encode16 |> String.downcase()
+		
+		  players = game.players
+		  new_player = %Player{user_name: userName}
+		  new_hand = assign_cards_to_blind(new_player.hand)
+		  new_player = update_in( new_player.hand, &( &1 = new_hand ) )
+		  new_player = update_in( new_player.session_id, &( &1 = session_id ) )
+          #players = %{players | session_id: new_player }
+		  players = Map.put players, session_id, new_player
+		  IO.inspect players
+		  
+          game = %{game | listOfUsers: listUsers, players: players, player: new_player, userName: session_id}
+		  IO.puts "==============================="
+		  IO.inspect game
+		  IO.puts "==============================="
+		  game
      else
           game
      end
@@ -853,6 +872,23 @@ end
 def client_view(game) do
      userName = ""
     %{ game | userName: userName }
+end
+
+def client_view(game, session_id) do
+	player = get_in game.players, [session_id]
+	players = get_list_of_players(game)
+	%{game | players: players}
+
+end
+
+def get_list_of_players(game) do
+	map_of_players = game.players
+	players = Enum.map map_of_players, fn {k, v} -> %Teenpatti.Player{ user_name: v.user_name, money_available: v.money_available  } end
+	
+	IO.puts "==============="
+	IO.inspect players
+	IO.puts "==============="
+	players
 end
 
 end
