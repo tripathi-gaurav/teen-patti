@@ -1,5 +1,7 @@
 defmodule Teenpatti.Game do
 
+alias Teenpatti.Player
+
 def new do
    %{
        userName: "",
@@ -22,36 +24,18 @@ def new do
        betValuePlayer1: 0,
        betValuePlayer2: 0,
        message1: "",
-       message2: ""
+       message2: "",
+       player: %Player{},
+       players: []
     }
 end
 
 def addUserToMap(game, userName) do
      if(length(game.listOfUsers) != 5) do
-          listUsers = game.listOfUsers ++ [userName];
-          %{
-             userName: game.userName,
-             listOfUsers: listUsers,
-             potMoney: game.potMoney,
-             currentStakeAmount: game.currentStakeAmount,
-             handForPlayer1: game.handForPlayer1,
-             handForPlayer2: game.handForPlayer2,
-             moneyPlayer1: game.moneyPlayer1,
-             moneyPlayer2: game.moneyPlayer2,
-             isShow: game.isShow,
-             isFoldPlayer1: game.isFoldPlayer1,
-             isFoldPlayer2: game.isFoldPlayer2,
-             isGameActive: game.isGameActive,
-             isBetPlayer1: game.isBetPlayer1,
-             isBetPlayer2: game.isBetPlayer2,
-             isSeenPlayer1: game.isSeenPlayer1,
-             isSeenPlayer2: game.isSeenPlayer2,
-             turn: game.turn,
-             betValuePlayer1: game.betValuePlayer1,
-             betValuePlayer2: game.betValuePlayer2,
-             message1: game.message1,
-             message2: game.message2
-           }
+          listUsers = game.listOfUsers ++ [userName]
+          players = game.players
+          players = players ++ [ %Player{user_name: userName} ]
+          %{game | listOfUsers: listUsers }
      else
           game
      end
@@ -60,29 +44,17 @@ end
 def start_game(game) do
 
   if (length(game.listOfUsers) >= 2 && !game.isGameActive && game.turn == 0) do
-     %{
-      userName: "",
-      listOfUsers: game.listOfUsers,
-      potMoney: game.potMoney + (length(game.listOfUsers) * game.currentStakeAmount),
-      currentStakeAmount: game.currentStakeAmount,
-      handForPlayer1: game.handForPlayer1,
-      handForPlayer2: game.handForPlayer2,
-      moneyPlayer1: game.moneyPlayer1 - game.currentStakeAmount,
-      moneyPlayer2: game.moneyPlayer2 - game.currentStakeAmount,
-      isShow: game.isShow,
-      isFoldPlayer1: game.isFoldPlayer1,
-      isFoldPlayer2: game.isFoldPlayer2,
-      isGameActive: true,
-      isBetPlayer1: true,
-      isBetPlayer2: game.isBetPlayer2,
-      isSeenPlayer1: game.isSeenPlayer1,
-      isSeenPlayer2: game.isSeenPlayer2,
-      turn: 1,
-      betValuePlayer1: game.betValuePlayer1,
-      betValuePlayer2: game.betValuePlayer2,
-      message1: game.message1,
-      message2: game.message2
-    }
+     potMoney = game.potMoney + (length(game.listOfUsers) * game.currentStakeAmount)
+     moneyPlayer1 = game.moneyPlayer1 - game.currentStakeAmount
+     moneyPlayer2 = game.moneyPlayer2 - game.currentStakeAmount
+     isGameActive = true
+     isBetPlayer1 = true
+     turn = 1
+     userName = ""
+     
+     %{game | potMoney: potMoney, moneyPlayer1: moneyPlayer1,
+      moneyPlayer2: moneyPlayer2, isGameActive: isGameActive,
+      turn: turn, userName: userName, isBetPlayer1: isBetPlayer1}
   else
      game
   end
@@ -110,236 +82,133 @@ end
 
 def onClickBetSeen(game, turn, betValue) do
    if(turn == 1) do
-       %{
-             userName: game.userName,
-             listOfUsers: game.listOfUsers,
-             potMoney: game.potMoney + betValue,
-             currentStakeAmount: div(betValue,2),
-             handForPlayer1: game.handForPlayer1,
-             handForPlayer2: game.handForPlayer2,
-             moneyPlayer1: game.moneyPlayer1 - betValue,
-             moneyPlayer2: game.moneyPlayer2,
-             isShow: game.isShow,
-             isFoldPlayer1: game.isFoldPlayer1,
-             isFoldPlayer2: game.isFoldPlayer2,
-             isGameActive: game.isGameActive,
-             isBetPlayer1: false,
-             isBetPlayer2: true,
-             isSeenPlayer1: game.isSeenPlayer1,
-             isSeenPlayer2: game.isSeenPlayer2,
-             turn: 2,
-             betValuePlayer1: game.betValuePlayer1,
-             betValuePlayer2: game.betValuePlayer2,
-             message1: game.message1,
-             message2: game.message2
-        }        
+   potMoney = game.potMoney + betValue
+   currentStakeAmount = div(betValue,2)
+   moneyPlayer1 = game.moneyPlayer1 - betValue
+   isBetPlayer1 = false
+   isBetPlayer2 = true
+   turn = 2
+
+     %{ game | potMoney: potMoney, 
+       currentStakeAmount: currentStakeAmount, 
+       moneyPlayer1: moneyPlayer1, 
+       isBetPlayer1: isBetPlayer1, 
+       isBetPlayer2: isBetPlayer2,
+       turn: turn
+       }
+                   
    else
-      %{
-             userName: game.userName,
-             listOfUsers: game.listOfUsers,
-             potMoney: game.potMoney + betValue,
-             currentStakeAmount: div(betValue,2),
-             handForPlayer1: game.handForPlayer1,
-             handForPlayer2: game.handForPlayer2,
-             moneyPlayer1: game.moneyPlayer1,
-             moneyPlayer2: game.moneyPlayer2 - betValue,
-             isShow: game.isShow,
-             isFoldPlayer1: game.isFoldPlayer1,
-             isFoldPlayer2: game.isFoldPlayer2,
-             isGameActive: game.isGameActive,
-             isBetPlayer1: true,
-             isBetPlayer2: false,
-             isSeenPlayer1: game.isSeenPlayer1,
-             isSeenPlayer2: game.isSeenPlayer2,
-             turn: 1,
-             betValuePlayer1: game.betValuePlayer1,
-             betValuePlayer2: game.betValuePlayer2,
-             message1: game.message1,
-             message2: game.message2
-      }
+          potMoney = game.potMoney + betValue
+          currentStakeAmount = div(betValue,2)
+          moneyPlayer2 = game.moneyPlayer2 - betValue
+          isBetPlayer1 = true
+          isBetPlayer2 = false
+          turn = 1
+      
+      %{ game | potMoney: potMoney, 
+       currentStakeAmount: currentStakeAmount, 
+       moneyPlayer2: moneyPlayer2, 
+       isBetPlayer1: isBetPlayer1, 
+       isBetPlayer2: isBetPlayer2,
+       turn: turn
+       }
    end
 end
 
 def onClickBetBlind(game, turn, betValue) do
     if(turn == 1) do
-       %{
-             userName: game.userName,
-             listOfUsers: game.listOfUsers,
-             potMoney: game.potMoney + betValue,
-             currentStakeAmount: betValue,
-             handForPlayer1: game.handForPlayer1,
-             handForPlayer2: game.handForPlayer2,
-             moneyPlayer1: game.moneyPlayer1 - betValue,
-             moneyPlayer2: game.moneyPlayer2,
-             isShow: game.isShow,
-             isFoldPlayer1: game.isFoldPlayer1,
-             isFoldPlayer2: game.isFoldPlayer2,
-             isGameActive: game.isGameActive,
-             isBetPlayer1: false,
-             isBetPlayer2: true,
-             isSeenPlayer1: game.isSeenPlayer1,
-             isSeenPlayer2: game.isSeenPlayer2,
-             turn: 2,
-             betValuePlayer1: game.betValuePlayer1,
-             betValuePlayer2: game.betValuePlayer2,
-             message1: game.message1,
-             message2: game.message2
-       }
+          potMoney= game.potMoney + betValue
+          currentStakeAmount = betValue
+          moneyPlayer1 = game.moneyPlayer1 - betValue
+          isBetPlayer1 = false
+          isBetPlayer2 = true
+          turn = 2
+       
+          %{ game | potMoney: potMoney,
+                    currentStakeAmount: currentStakeAmount,
+                    moneyPlayer1: moneyPlayer1,
+                    isBetPlayer1: isBetPlayer1,
+                    isBetPlayer2: isBetPlayer2,
+                    turn: turn
+          }
     else
-       %{
-             userName: game.userName,
-             listOfUsers: game.listOfUsers,
-             potMoney: game.potMoney + betValue,
-             currentStakeAmount: betValue,
-             handForPlayer1: game.handForPlayer1,
-             handForPlayer2: game.handForPlayer2,
-             moneyPlayer1: game.moneyPlayer1,
-             moneyPlayer2: game.moneyPlayer2 - betValue,
-             isShow: game.isShow,
-             isFoldPlayer1: game.isFoldPlayer1,
-             isFoldPlayer2: game.isFoldPlayer2,
-             isGameActive: game.isGameActive,
-             isBetPlayer1: true,
-             isBetPlayer2: false,
-             isSeenPlayer1: game.isSeenPlayer1,
-             isSeenPlayer2: game.isSeenPlayer2,
-             turn: 1,
-             betValuePlayer1: game.betValuePlayer1,
-             betValuePlayer2: game.betValuePlayer2,
-             message1: game.message1,
-             message2: game.message2
-       }
+          potMoney= game.potMoney + betValue
+          currentStakeAmount = betValue
+          moneyPlayer2 = game.moneyPlayer2 - betValue
+          isBetPlayer1 = true
+          isBetPlayer2 = false
+          turn = 1
+       
+          %{ game | potMoney: potMoney,
+                    currentStakeAmount: currentStakeAmount,
+                    moneyPlayer2: moneyPlayer2,
+                    isBetPlayer1: isBetPlayer1,
+                    isBetPlayer2: isBetPlayer2,
+                    turn: turn
+          }
     end
 end
 
 def changeSeen(game, turn) do
     if(turn == 1) do
-     %{
-      userName: "",
-      listOfUsers: game.listOfUsers,
-      potMoney: game.potMoney,
-      currentStakeAmount: game.currentStakeAmount,
-      handForPlayer1: game.handForPlayer1,
-      handForPlayer2: game.handForPlayer2,
-      moneyPlayer1: game.moneyPlayer1,
-      moneyPlayer2: game.moneyPlayer2,
-      isShow: game.isShow,
-      isFoldPlayer1: game.isFoldPlayer1,
-      isFoldPlayer2: game.isFoldPlayer2,
-      isGameActive: true,
-      isBetPlayer1: true,
-      isBetPlayer2: game.isBetPlayer2,
-      isSeenPlayer1: true,
-      isSeenPlayer2: game.isSeenPlayer2,
-      turn: 1,
-      betValuePlayer1: game.betValuePlayer1,
-      betValuePlayer2: game.betValuePlayer2,
-      message1: game.message1,
-      message2: game.message2
-    }
+          userName = ""
+          isGameActive = true
+          isBetPlayer1 = true
+          isSeenPlayer1 = true
+          turn = 1
+               
+          %{game |   userName: userName, 
+               isGameActive: isGameActive,
+               isBetPlayer1: isBetPlayer1, 
+               isSeenPlayer1: isSeenPlayer1,
+               turn: turn
+          }
     else
-    %{
-      userName: "",
-      listOfUsers: game.listOfUsers,
-      potMoney: game.potMoney,
-      currentStakeAmount: game.currentStakeAmount,
-      handForPlayer1: game.handForPlayer1,
-      handForPlayer2: game.handForPlayer2,
-      moneyPlayer1: game.moneyPlayer1,
-      moneyPlayer2: game.moneyPlayer2,
-      isShow: game.isShow,
-      isFoldPlayer1: game.isFoldPlayer1,
-      isFoldPlayer2: game.isFoldPlayer2,
-      isGameActive: true,
-      isBetPlayer1: game.isBetPlayer1,
-      isBetPlayer2: true,
-      isSeenPlayer1: game.isSeenPlayer1,
-      isSeenPlayer2: true,
-      turn: 2,
-      betValuePlayer1: game.betValuePlayer1,
-      betValuePlayer2: game.betValuePlayer2,
-      message1: game.message1,
-      message2: game.message2
-    }
+          userName = ""
+          isGameActive = true
+          isBetPlayer2 = true
+          isSeenPlayer2 = true
+          turn = 2
+          %{ game |  userName: userName, 
+                         isGameActive: isGameActive, 
+                         #isBetPlayer1: isBetPlayer1, 
+                         isBetPlayer2: isBetPlayer2, 
+                         turn: turn
+          }
     end
 end
 
 def click_fold(game, turn) do
    if turn == 1 do
-    %{
-      userName: "",
-      listOfUsers: game.listOfUsers,
-      potMoney: 0,
-      currentStakeAmount: game.currentStakeAmount,
-      handForPlayer1: game.handForPlayer1,
-      handForPlayer2: game.handForPlayer2,
-      moneyPlayer1: game.moneyPlayer1,
-      moneyPlayer2: game.moneyPlayer2 + game.potMoney,
-      isShow: game.isShow,
-      isFoldPlayer1: game.isFoldPlayer1,
-      isFoldPlayer2: game.isFoldPlayer2,
-      isGameActive: game.isGameActive,
-      isBetPlayer1: game.isBetPlayer1,
-      isBetPlayer2: game.isBetPlayer2,
-      isSeenPlayer1: game.isSeenPlayer1,
-      isSeenPlayer2: game.isSeenPlayer2,
-      turn: 0,
-      betValuePlayer1: game.betValuePlayer1,
-      betValuePlayer2: game.betValuePlayer2,
-      message1: game.message1,
-      message2: "Congratulations! You won this round!"
-    }
+          userName = ""
+          potMoney = 0
+          turn = 0
+          message2 = "Congratulations! You won this round!"
+          moneyPlayer2 = game.moneyPlayer2 + game.potMoney
+          %{
+             game | userName: userName,
+                    potMoney: potMoney,
+                    turn: turn,
+                    message2: message2,
+                    moneyPlayer2: moneyPlayer2
+          }
    else
-    %{
-      userName: "",
-      listOfUsers: game.listOfUsers,
-      potMoney: 0,
-      currentStakeAmount: game.currentStakeAmount,
-      handForPlayer1: game.handForPlayer1,
-      handForPlayer2: game.handForPlayer2,
-      moneyPlayer1: game.moneyPlayer1 + game.potMoney,
-      moneyPlayer2: game.moneyPlayer2,
-      isShow: game.isShow,
-      isFoldPlayer1: game.isFoldPlayer1,
-      isFoldPlayer2: game.isFoldPlayer2,
-      isGameActive: game.isGameActive,
-      isBetPlayer1: game.isBetPlayer1,
-      isBetPlayer2: game.isBetPlayer2,
-      isSeenPlayer1: game.isSeenPlayer1,
-      isSeenPlayer2: game.isSeenPlayer2,
-      turn: 0,
-      betValuePlayer1: game.betValuePlayer1,
-      betValuePlayer2: game.betValuePlayer2,
-      message1: "Congratulations! You won the round!",
-      message2: game.message2
-    }   
+          userName = ""
+          potMoney = 0
+          turn = 0
+          message1 = "Congratulations! You won this round!"
+          moneyPlayer1 = game.moneyPlayer1 + game.potMoney
+          %{ game | userName: userName,
+                    potMoney: potMoney,
+                    turn: turn,
+                    message1: message1,
+                    moneyPlayer1: moneyPlayer1
+          }   
    end
 end
 
 def change_show(game, turn) do
-   %{
-      userName: "",
-      listOfUsers: game.listOfUsers,
-      potMoney: game.potMoney,
-      currentStakeAmount: game.currentStakeAmount,
-      handForPlayer1: game.handForPlayer1,
-      handForPlayer2: game.handForPlayer2,
-      moneyPlayer1: game.moneyPlayer1,
-      moneyPlayer2: game.moneyPlayer2,
-      isShow: true,
-      isFoldPlayer1: game.isFoldPlayer1,
-      isFoldPlayer2: game.isFoldPlayer2,
-      isGameActive: game.isGameActive,
-      isBetPlayer1: game.isBetPlayer1,
-      isBetPlayer2: game.isBetPlayer2,
-      isSeenPlayer1: game.isSeenPlayer1,
-      isSeenPlayer2: game.isSeenPlayer2,
-      turn: game.turn,
-      betValuePlayer1: game.betValuePlayer1,
-      betValuePlayer2: game.betValuePlayer2,
-      message1: game.message1,
-      message2: game.message2
-    }
+   %{ game | userName: "", isShow: true }
 end
 
 def check_winner(handForPlayer1, handForPlayer2) do
@@ -861,53 +730,52 @@ end
 def evaluate_show_seen(game, turn) do
    handForPlayer2 = assign_cards_to_blind(game.handForPlayer2)
    message = check_winner(game.handForPlayer1, handForPlayer2)
+     userName = ""
+     potMoney = game.potMoney + 2 * game.currentStakeAmount
+     
+     isShow = false
+     isFoldPlayer1 = false
+     isFoldPlayer2 = false
+     isBetPlayer2 = false
+     isBetPlayer1 = false
+     
+     turn = 0
+     betValuePlayer1 = 0
+     betValuePlayer2 = 0
+   message2 = message
    if(turn == 1) do
-     %{
-      userName: "",
-      listOfUsers: game.listOfUsers,
-      potMoney: game.potMoney + 2 * game.currentStakeAmount,
-      currentStakeAmount: game.currentStakeAmount,
-      handForPlayer1: game.handForPlayer1,
-      handForPlayer2: handForPlayer2,
-      moneyPlayer1: game.moneyPlayer1 - 2 * game.currentStakeAmount,
-      moneyPlayer2: game.moneyPlayer2,
-      isShow: false,
-      isFoldPlayer1: false,
-      isFoldPlayer2: false,
-      isGameActive: game.isGameActive,
-      isBetPlayer1: false,
-      isBetPlayer2: false,
-      isSeenPlayer1: game.isSeenPlayer1,
-      isSeenPlayer2: true,
-      turn: 0,
-      betValuePlayer1: 0,
-      betValuePlayer2: 0,
-      message1: game.message1,
-      message2: message
-    }
+     moneyPlayer1 = game.moneyPlayer1 - 2 * game.currentStakeAmount
+     isSeenPlayer2 = true
+     %{   game |    userName: userName,
+                    potMoney: potMoney,
+                    moneyPlayer1: moneyPlayer1,
+                         isShow: isShow,
+                         isFoldPlayer1: isFoldPlayer1,
+                         isFoldPlayer2: isFoldPlayer2,
+                         isBetPlayer1: isBetPlayer1,
+                         isBetPlayer2: isBetPlayer2,
+                    isSeenPlayer2: isSeenPlayer2,
+                         turn: turn,
+                         betValuePlayer1: betValuePlayer1,
+                         betValuePlayer2: betValuePlayer2,
+                         message2: message
+     }
    else
-    %{
-      userName: "",
-      listOfUsers: game.listOfUsers,
-      potMoney: game.potMoney + 2 * game.currentStakeAmount,
-      currentStakeAmount: game.currentStakeAmount,
-      handForPlayer1: game.handForPlayer1,
-      handForPlayer2: handForPlayer2,
-      moneyPlayer1: game.moneyPlayer1,
-      moneyPlayer2: game.moneyPlayer2 - 2 * game.currentStakeAmount,
-      isShow: false,
-      isFoldPlayer1: false,
-      isFoldPlayer2: false,
-      isGameActive: game.isGameActive,
-      isBetPlayer1: false,
-      isBetPlayer2: false,
-      isSeenPlayer1: true,
-      isSeenPlayer2: game.isSeenPlayer2,
-      turn: 0,
-      betValuePlayer1: 0,
-      betValuePlayer2: 0,
-      message1: game.message1,
-      message2: message
+     moneyPlayer2 = game.moneyPlayer2 - 2 * game.currentStakeAmount
+     isSeenPlayer1 = true
+    %{ game |  userName: userName,
+               potMoney: potMoney,
+               moneyPlayer2: moneyPlayer2,
+                    isShow: isShow,
+                    isFoldPlayer1: isFoldPlayer1,
+                    isFoldPlayer2: isFoldPlayer2,
+                    isBetPlayer1: isBetPlayer1,
+                    isBetPlayer2: isBetPlayer2,
+               isSeenPlayer1: isSeenPlayer1,
+                    turn: turn,
+                    betValuePlayer1: betValuePlayer1,
+                    betValuePlayer2: betValuePlayer2,
+                    message2: message
     }
    end
     
@@ -917,6 +785,7 @@ def evaluate_show_blind(game, turn) do
      handForPlayer2 = assign_cards_to_blind(game.handForPlayer2)
      handForPlayer1 = assign_cards_to_blind(game.handForPlayer1)
      message = check_winner(handForPlayer1, handForPlayer2)
+
      if(turn == 1) do
      %{
       userName: "",
@@ -970,83 +839,20 @@ end
 
 def assignCards(game, turn) do 
      listOfMapOfCards = getListOfCards()
-     if turn == 1 do
-          handForPlayer1 = Enum.slice(listOfMapOfCards, 0..2)
-           %{
-              userName: "",
-              listOfUsers: game.listOfUsers,
-              potMoney: game.potMoney,
-              currentStakeAmount: game.currentStakeAmount,
-              handForPlayer1: handForPlayer1,
-              handForPlayer2: game.handForPlayer2,
-              moneyPlayer1: game.moneyPlayer1,
-              moneyPlayer2: game.moneyPlayer2,
-              isShow: game.isShow,
-              isFoldPlayer1: game.isFoldPlayer1,
-              isFoldPlayer2: game.isFoldPlayer2,
-              isGameActive: game.isGameActive,
-              isBetPlayer1: game.isBetPlayer1,
-              isBetPlayer2: game.isBetPlayer2,
-              isSeenPlayer1: game.isSeenPlayer1,
-              isSeenPlayer2: game.isSeenPlayer2,
-              turn: game.turn,
-              betValuePlayer1: game.betValuePlayer1,
-              betValuePlayer2: game.betValuePlayer2,
-              message1: game.message1,
-              message2: game.message2
-     }
-     else
-          handForPlayer2 = Enum.slice(listOfMapOfCards, 3..5)
-           %{
-              userName: "",
-              listOfUsers: game.listOfUsers,
-              potMoney: game.potMoney,
-              currentStakeAmount: game.currentStakeAmount,
-              handForPlayer1: game.handForPlayer1,
-              handForPlayer2: handForPlayer2,
-              moneyPlayer1: game.moneyPlayer1,
-              moneyPlayer2: game.moneyPlayer2,
-              isShow: game.isShow,
-              isFoldPlayer1: game.isFoldPlayer1,
-              isFoldPlayer2: game.isFoldPlayer2,
-              isGameActive: game.isGameActive,
-              isBetPlayer1: game.isBetPlayer1,
-              isBetPlayer2: game.isBetPlayer2,
-              isSeenPlayer1: game.isSeenPlayer1,
-              isSeenPlayer2: game.isSeenPlayer2,
-              turn: game.turn,
-              betValuePlayer1: game.betValuePlayer1,
-              betValuePlayer2: game.betValuePlayer2,
-              message1: game.message1,
-              message2: game.message2
-            }
+     cond do
+          turn == 1 and game.isSeenPlayer1 == false ->
+               handForPlayer1 = Enum.slice(listOfMapOfCards, 0..2)
+               %{ game | handForPlayer1: handForPlayer1, isSeenPlayer1: true }
+          turn == 2 and game.isSeenPlayer2 == false ->
+               handForPlayer2 = Enum.slice(listOfMapOfCards, 3..5)
+               %{ game | handForPlayer2: handForPlayer2, isSeenPlayer2: true }
+          true -> game
     end
 end
 
 def client_view(game) do
-    %{
-      userName: "",
-      listOfUsers: game.listOfUsers,
-      potMoney: game.potMoney,
-      currentStakeAmount: game.currentStakeAmount,
-      handForPlayer1: game.handForPlayer1,
-      handForPlayer2: game.handForPlayer2,
-      moneyPlayer1: game.moneyPlayer1,
-      moneyPlayer2: game.moneyPlayer2,
-      isShow: game.isShow,
-      isFoldPlayer1: game.isFoldPlayer1,
-      isFoldPlayer2: game.isFoldPlayer2,
-      isGameActive: game.isGameActive,
-      isBetPlayer1: game.isBetPlayer1,
-      isBetPlayer2: game.isBetPlayer2,
-      isSeenPlayer1: game.isSeenPlayer1,
-      isSeenPlayer2: game.isSeenPlayer2,
-      turn: game.turn,
-      betValuePlayer1: game.betValuePlayer1,
-      betValuePlayer2: game.betValuePlayer2,
-      message1: game.message1,
-      message2: game.message2
-    }
+     userName = ""
+    %{ game | userName: userName }
 end
 
 end

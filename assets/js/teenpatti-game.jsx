@@ -219,11 +219,11 @@ class Table extends React.Component {
     }
 
     onClickSeen() {
-        this.channel
-            .push("change_seen", { turn: this.state.turn })
-            .receive("ok", resp => {
-                this.got_view(resp);
-            });
+        // this.channel
+        //     .push("change_seen", { turn: this.state.turn })
+        //     .receive("ok", resp => {
+        //         this.got_view(resp);
+        //     });
         this.channel
             .push("assign_cards", { turn: this.state.turn })
             .receive("ok", resp => {
@@ -232,6 +232,7 @@ class Table extends React.Component {
     }
 
     onClickBet() {
+        console.log(this.state.turn + " && " + this.state.isBetPlayer1);
         if (this.state.turn == 1 && this.state.isBetPlayer1) {
             if (this.state.isSeenPlayer1) {
                 if (
