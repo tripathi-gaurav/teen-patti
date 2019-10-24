@@ -1,0 +1,39 @@
+
+Web Dev Spring 2018 Project 1 Status
+
+Answer the following questions:
+
+
+1. What are the names of the members of your team?
+
+
+
+2. What's the URL of the github repo with your code for this project?
+
+
+
+3. What is the URL(s) that you deployed to?
+
+
+
+4. Is your app functionality complete? If not, what's missing?
+
+
+
+5. Is your app properly deployed? If not, what went wrong?
+
+
+
+6. What parts of the project did each team member work on?
+
+
+
+7. Are all your third-party assets appropriately licensed and credited?
+
+
+
+And here's a list of tasks for grading comments. Just leave this here:
+ - Development
+ - Deployment
+ - Submission
+ - Report
