@@ -50,10 +50,10 @@ def addUserToMap(game, userName) do
 		  players = Map.put players, session_id, new_player
 		  IO.inspect players
 		  
-          game = %{game | listOfUsers: listUsers, players: players, player: new_player, userName: session_id}
-		  #IO.puts "==============================="
-		  #IO.inspect game
-		  #IO.puts "==============================="
+          game = %{game | listOfUsers: listUsers, players: players, player: new_player, userName: userName}
+		  IO.puts "==============================="
+		  IO.inspect game
+		  IO.puts "==============================="
 		  game
      else
           game
@@ -61,22 +61,30 @@ def addUserToMap(game, userName) do
 end
 
 def start_game(game) do
-
-  if (length(game.listOfUsers) >= 2 && !game.isGameActive && game.turn == 0) do
-     potMoney = game.potMoney + (length(game.listOfUsers) * game.currentStakeAmount)
-     moneyPlayer1 = game.moneyPlayer1 - game.currentStakeAmount
-     moneyPlayer2 = game.moneyPlayer2 - game.currentStakeAmount
-     isGameActive = true
-     isBetPlayer1 = true
-     turn = 1
-     userName = ""
-     
-     %{game | potMoney: potMoney, moneyPlayer1: moneyPlayer1,
-      moneyPlayer2: moneyPlayer2, isGameActive: isGameActive,
-      turn: turn, userName: userName, isBetPlayer1: isBetPlayer1}
-  else
-     game
-  end
+	num_of_players = Enum.count game.players
+	if num_of_players >= 2 do
+		pot_money = game.potMoney + num_of_players * game.currentStakeAmount
+		players = Enum.map game.players, fn {k,v} -> 
+											money_available = v.money_available - game.currentStakeAmount
+											{k, %Teenpatti.Player{v | money_available: money_available} } 
+										end
+		%{game | players: players}
+	end
+	game
+#   if (length(game.listOfUsers) >= 2 && !game.isGameActive && game.turn == 0) do
+#      potMoney = game.potMoney + (length(game.listOfUsers) * game.currentStakeAmount)
+#      moneyPlayer1 = game.moneyPlayer1 - game.currentStakeAmount
+#      moneyPlayer2 = game.moneyPlayer2 - game.currentStakeAmount
+#      isGameActive = true
+#      isBetPlayer1 = true
+#      turn = 1
+#      userName = ""
+#      %{game | potMoney: potMoney, moneyPlayer1: moneyPlayer1,
+#       moneyPlayer2: moneyPlayer2, isGameActive: isGameActive,
+#       turn: turn, userName: userName, isBetPlayer1: isBetPlayer1}
+#   else
+#      game
+#   end
 end
 
 

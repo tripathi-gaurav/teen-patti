@@ -10,8 +10,8 @@ def join("game:" <> gameName, payload, socket) do
       socket = socket
           |> assign(:game, game)
           |> assign(:gameName, gameName)
-      BackupAgent.put(gameName, game)
-      {:ok, %{"join" => gameName, "game" => Game.client_view(game)}, socket}
+      
+      {:ok, %{"join" => gameName, "game" => Game.client_view(game, "")}, socket}
    else
       {:error, %{reason: "unauthorized"}}
    end
@@ -26,7 +26,7 @@ def handle_in("join_game", %{"userName" => userName}, socket) do
     #IO.inspect Game.client_view(game, game.userName)
     cnt = Enum.count game.players
     BackupAgent.put(gameName, game)
-    IO.puts "players: #{cnt}"
+    IO.puts "players: #{cnt} backupagent name: #{gameName}"
     if cnt > 1 do
         IO.puts "broooooaddd: #{cnt}"
         x = broadcast socket, "refresh_view", %{"resp" => gameName}
@@ -36,16 +36,18 @@ def handle_in("join_game", %{"userName" => userName}, socket) do
 end  
 
 def handle_in("refresh_view", %{"userName" => userName, "gameName" => gameName}, socket) do
-    IO.puts "&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+    IO.puts "&&&&&&&&&&&&&&&&&&&&&&&&&&&& #{:game} #{gameName}"
+    
     game = socket.assigns[:game]
     game = BackupAgent.get( gameName )
     #game = Game.start_game(socket.assigns[:game])
     #game = socket.assigns[:game]
-    IO.inspect game
+    
     #IO.inspect socket
     #game = game.assigns[:game]
     socket = assign(socket, :game, game)
     #BackupAgent.put(gameName, game)
+    IO.puts userName
     
     {:reply, {:ok, %{"game" => Game.client_view(game, userName)}}, socket}
 end

@@ -189,7 +189,7 @@ class Table extends React.Component {
     refresh_view(view) {
         console.log(view);
         this.channel
-            .push("refresh_view", { userName: this.state.userName, gameName: view.resp })
+            .push("refresh_view", { userName: this.state.player.session_id, gameName: view.resp })
             .receive("ok", resp => {
                 console.log(" refresh: " + resp);
                 this.got_view(resp.game);
