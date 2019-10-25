@@ -5,5 +5,6 @@ defmodule Teenpatti.Player do
     is_show: false,
     is_turn: false,
     is_fold: false,
+    is_seen: false,
     session_id: ""
 end

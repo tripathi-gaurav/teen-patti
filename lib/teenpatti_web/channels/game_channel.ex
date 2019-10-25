@@ -24,9 +24,31 @@ def handle_in("join_game", %{"userName" => userName}, socket) do
     socket = assign(socket, :game, game)
     #IO.inspect game
     #IO.inspect Game.client_view(game, game.userName)
+    cnt = Enum.count game.players
     BackupAgent.put(gameName, game)
+    IO.puts "players: #{cnt}"
+    if cnt > 1 do
+        IO.puts "broooooaddd: #{cnt}"
+        x = broadcast socket, "refresh_view", %{"resp" => gameName}
+        IO.inspect x
+    end
     {:reply, {:ok, %{"game" => Game.client_view(game, game.userName)}}, socket}
 end  
+
+def handle_in("refresh_view", %{"userName" => userName, "gameName" => gameName}, socket) do
+    IO.puts "&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+    game = socket.assigns[:game]
+    game = BackupAgent.get( gameName )
+    #game = Game.start_game(socket.assigns[:game])
+    #game = socket.assigns[:game]
+    IO.inspect game
+    #IO.inspect socket
+    #game = game.assigns[:game]
+    socket = assign(socket, :game, game)
+    #BackupAgent.put(gameName, game)
+    
+    {:reply, {:ok, %{"game" => Game.client_view(game, userName)}}, socket}
+end
 
 def handle_in("start_game", %{}, socket) do
     gameName = socket.assigns[:gameName]
@@ -44,14 +66,20 @@ def handle_in("reset_game", %{}, socket) do
     #game.isGameActive = false
     #game.turn = 0
     userName = game.userName
+    cnt = Enum.count game.players
+
     game = Game.new()
     game = %{game | userName: userName }
-
+    if cnt > 1 do
+        IO.puts "broooooaddd: #{cnt}"
+        broadcast!(socket, "reset_game", %{})
+    end
     #game = Game.reset_game(socket.assigns[:game])
     socket = assign(socket, :game, game)
     BackupAgent.put(gameName, game)
     {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
 end
+
 
 def handle_in("click_bet_seen", %{"turn" => turn, "betValue" => betValue}, socket) do
     gameName = socket.assigns[:gameName]
@@ -78,6 +106,19 @@ def handle_in("change_seen", %{"turn" => turn}, socket) do
     {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
 end
 
+def handle_in("see_cards", %{"turn" => turn}, socket) do
+    gameName = socket.assigns[:gameName]
+    game = Game.see_cards(socket.assigns[:game], turn)
+    IO.puts "*******zzzzzzzzzz*********"
+    IO.inspect game
+    IO.puts "*************************"
+    socket = assign(socket, :game, game)
+    
+    BackupAgent.put(gameName, game)
+    {:reply, {:ok, %{"game" => Game.client_view(game, turn)}}, socket}
+end
+
+# TODO: remove since see_cards should replace this
 def handle_in("assign_cards", %{"turn" => turn}, socket) do
     gameName = socket.assigns[:gameName]
     game = Game.assignCards(socket.assigns[:game], turn)

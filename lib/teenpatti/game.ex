@@ -51,9 +51,9 @@ def addUserToMap(game, userName) do
 		  IO.inspect players
 		  
           game = %{game | listOfUsers: listUsers, players: players, player: new_player, userName: session_id}
-		  IO.puts "==============================="
-		  IO.inspect game
-		  IO.puts "==============================="
+		  #IO.puts "==============================="
+		  #IO.inspect game
+		  #IO.puts "==============================="
 		  game
      else
           game
@@ -869,25 +869,60 @@ def assignCards(game, turn) do
     end
 end
 
+def see_cards(game, session_id) do
+	player = get_in game.players, [session_id]
+	player = %{player | is_seen: true}
+	#IO.puts "-----$$$$$------"
+	#IO.inspect player
+	#IO.puts "-----$$$$$------"
+	%{game | player: player}
+	players = update_in game.players, [session_id], &(&1=player)
+	%{game | players: players}
+end
+
 def client_view(game) do
      userName = ""
     %{ game | userName: userName }
 end
 
 def client_view(game, session_id) do
+	players = get_list_of_players(game, session_id)
 	player = get_in game.players, [session_id]
-	players = get_list_of_players(game)
+	#player = %Player{player | is_seen}
+	#IO.puts "==========FINAL============="
+	#IO.inspect players
+	#IO.puts "============================="
+	#update_in players, [session_id], &(&1=player)
 	%{game | players: players}
 
 end
 
-def get_list_of_players(game) do
+def get_list_of_players(game, session_id) do
 	map_of_players = game.players
-	players = Enum.map map_of_players, fn {k, v} -> %Teenpatti.Player{ user_name: v.user_name, money_available: v.money_available  } end
-	
-	IO.puts "==============="
-	IO.inspect players
-	IO.puts "==============="
+	players = Enum.map map_of_players, fn {k, v} -> 
+	IO.puts k
+	IO.puts session_id
+	if( k == session_id ) do
+		IO.puts "lock and load"
+		IO.puts v.is_seen
+		%Teenpatti.Player{ 
+			user_name: v.user_name, 
+			money_available: v.money_available,
+			is_show: v.is_show,
+			is_seen: v.is_seen,
+			session_id: v.session_id,
+			hand: v.hand
+			}
+	else
+		%Teenpatti.Player{ 
+			user_name: v.user_name, 
+			money_available: v.money_available  
+			} 
+	end
+	end
+	# IO.puts "========asdas======="
+	# IO.inspect players
+	# IO.puts "==============="
 	players
 end
 
