@@ -43,7 +43,13 @@ def addUserToMap(game, userName) do
 		  session_id = :crypto.hmac(:sha256, key, userName) |> Base.encode16 |> String.downcase()
 		
 		  players = game.players
-		  new_player = %Player{user_name: userName}
+		  new_player = if length( game.listOfUsers ) == 0 do
+		  	%Player{user_name: userName, is_turn: true}
+		  else
+		  	%Player{user_name: userName}
+		  end
+
+		  #new_player = %Player{user_name: userName}
 		  new_hand = assign_cards_to_blind(new_player.hand)
 		  new_player = update_in( new_player.hand, &( &1 = new_hand ) )
 		  new_player = update_in( new_player.session_id, &( &1 = session_id ) )
@@ -62,20 +68,20 @@ def addUserToMap(game, userName) do
      end
 end
 
-def update_money( map, session_id ) do
+def update_money( map, session_id, amt ) do
 	player = Map.fetch! map, session_id
-	money = player.money_available - 10
+	money = player.money_available - amt
 	player = %Player{player | money_available: money}
 	player
 end
 
-def update_internal_map( map, [ hd | tl] ) do
-  player = update_money( map, hd )
+def update_internal_map_for_game_start( map, [ hd | tl] ) do
+  player = update_money( map, hd, 10 )
   m = Map.put map, hd, player
-  update_internal_map m, tl
+  update_internal_map_for_game_start m, tl
 end
 
-def update_internal_map( map, _ ) do
+def update_internal_map_for_game_start( map, _ ) do
   map
 end
 
@@ -88,7 +94,7 @@ def start_game(game) do
 	if num_of_players >= 2 do
 		pot_money = game.potMoney + num_of_players * game.currentStakeAmount
 		keys = Map.keys( game.internal_all_players )
-		map = update_internal_map( game.internal_all_players, keys )
+		map = update_internal_map_for_game_start( game.internal_all_players, keys )
 		# players = Enum.map game.internal_all_players, fn {k,v} -> 
 		# 									money_available = v.money_available - game.currentStakeAmount
 		# 									{k, %Teenpatti.Player{v | money_available: money_available} } 
@@ -121,39 +127,56 @@ def create_list_of_cards_map(cardNumberList, finalList) when length(cardNumberLi
    create_list_of_cards_map(tl(cardNumberList), finalList ++ [spadeMap] ++ [heartMap] ++ [clubMap] ++ [diamondMap])
 end
 
-def onClickBetSeen(game, turn, betValue) do
-   if(turn == 1) do
-   potMoney = game.potMoney + betValue
-   currentStakeAmount = div(betValue,2)
-   moneyPlayer1 = game.moneyPlayer1 - betValue
-   isBetPlayer1 = false
-   isBetPlayer2 = true
-   turn = 2
+def get_index_of_player_using_key(keys, key) do
+	get_index_of_player_using_key( keys, key, 0)
+end
 
-     %{ game | potMoney: potMoney, 
-       currentStakeAmount: currentStakeAmount, 
-       moneyPlayer1: moneyPlayer1, 
-       isBetPlayer1: isBetPlayer1, 
-       isBetPlayer2: isBetPlayer2,
-       turn: turn
-       }
-                   
-   else
-          potMoney = game.potMoney + betValue
-          currentStakeAmount = div(betValue,2)
-          moneyPlayer2 = game.moneyPlayer2 - betValue
-          isBetPlayer1 = true
-          isBetPlayer2 = false
-          turn = 1
-      
-      %{ game | potMoney: potMoney, 
-       currentStakeAmount: currentStakeAmount, 
-       moneyPlayer2: moneyPlayer2, 
-       isBetPlayer1: isBetPlayer1, 
-       isBetPlayer2: isBetPlayer2,
-       turn: turn
-       }
-   end
+def get_index_of_player_using_key([hd|tl], key, index) do
+	if ( hd == key ) do
+		index
+	else
+		get_index_of_player_using_key( tl, key, index+1 )
+	end
+end
+
+def get_index_of_player_using_key( _, _key, index) do
+#this will probably NEVER execute
+	index
+end
+
+def onClickBetSeen(game, turn, betValue) do
+
+	players = game.internal_all_players
+	currentStakeAmount = div(betValue,2)
+	#update money_available with player
+	player = update_money players, turn, betValue
+	player = %Player{ player | is_turn: false }
+	#udpate the current map of players
+	players = Map.put players, turn, player
+	#put the updated map of players in game.internal_all_players
+	game = %{ game | internal_all_players: players, currentStakeAmount: currentStakeAmount }
+	keys = Map.keys players
+	index_of_player = get_index_of_player_using_key( keys, turn )
+	#retreive next key
+	
+	session_id_of_next_player = if ( index_of_player == length(keys)-1 ) do
+		Enum.at keys, 0
+	else
+		Enum.at keys, index_of_player+1
+	end
+	next_player = Map.fetch! players, session_id_of_next_player
+	next_player = %Player{next_player | is_turn: true}
+	players = Map.put players, session_id_of_next_player, next_player
+	game = %{ game | internal_all_players: players}
+
+	IO.puts "+++++++++++++++"
+	#IO.puts "#{index_of_player} #{length(keys)}"
+	#IO.inspect game
+	IO.puts "+++++++++++++++"
+	
+	potMoney = game.potMoney + betValue
+	%{game | potMoney: potMoney}
+
 end
 
 def onClickBetBlind(game, turn, betValue) do
@@ -896,9 +919,9 @@ def see_cards(game, session_id) do
 	#players = get_list_of_players(game, session_id)
 	#player = hd( Enum.filter( players, fn x -> x.session_id == session_id end ) )
 	#player = game.internal_all_players[session_id]
-	IO.puts ">>>>>>>>>>>"
-	IO.inspect game
-	IO.puts ">>>>>>>>>>>"
+	# IO.puts ">>>>>>>>>>>"
+	# IO.inspect game
+	# IO.puts ">>>>>>>>>>>"
 	player = Map.fetch! game.internal_all_players, session_id
 	player = %{player | is_seen: true}
 	#Map.update_in game.internal_all_players, session_id, &()
@@ -911,11 +934,11 @@ def see_cards(game, session_id) do
 	# 					end
 	# 				end
 	
-	IO.puts "-----$$$$$------"
-	IO.inspect players
-	IO.puts "-----$$$$$------"
-	IO.inspect player
-	IO.puts "-----$$$$$------"
+	# IO.puts "-----$$$$$------"
+	# IO.inspect players
+	# IO.puts "-----$$$$$------"
+	# IO.inspect player
+	# IO.puts "-----$$$$$------"
 	%{game | player: player}
 	#players = update_in game.players, [session_id], &(&1=player)
 	%{game | internal_all_players: players}
@@ -974,6 +997,7 @@ def get_list_of_players(game, session_id) do
 			money_available: v.money_available,
 			is_show: v.is_show,
 			is_seen: v.is_seen,
+			is_turn: v.is_turn,
 			session_id: v.session_id,
 			hand: v.hand
 			}

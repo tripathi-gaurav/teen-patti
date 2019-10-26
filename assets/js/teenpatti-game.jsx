@@ -266,15 +266,21 @@ class Table extends React.Component {
 
     onClickBet() {
         let bet_amount = parseInt(document.getElementById("tb2").value);
-        let _user_session = this.state.userName;
+        let _user_session = this.state.player.session_id;
         console.log("betting user: " + _user_session);
         console.log("bet amount: " + bet_amount);
         let is_seen = this.state.player.is_seen;
+        let is_turn = this.state.player.is_turn;
+
+        if (!is_turn) {
+            alert("Not your turn. ");
+            return;
+        }
 
         // TODO: reverse the boolean logic to channel.push only once
         if (is_seen &&
             bet_amount >= 2 * this.state.currentStakeAmount &&
-            bet_amt <= 4 * this.state.currentStakeAmount
+            bet_amount <= 4 * this.state.currentStakeAmount
         ) {
 
             this.channel

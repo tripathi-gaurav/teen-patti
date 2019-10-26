@@ -95,10 +95,17 @@ end
 
 def handle_in("click_bet_seen", %{"turn" => turn, "betValue" => betValue}, socket) do
     gameName = socket.assigns[:gameName]
-    game = Game.onClickBetSeen(socket.assigns[:game], turn, betValue)
+    game = BackupAgent.get( gameName )
+    #game = Game.onClickBetSeen(socket.assigns[:game], turn, betValue)
+    game = Game.onClickBetSeen(game, turn, betValue)
     socket = assign(socket, :game, game)
     BackupAgent.put(gameName, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+    cnt = Enum.count game.players
+    if cnt > 1 do
+        IO.puts "broadcast for click_bet_seen: #{cnt}"
+        x = broadcast socket, "refresh_view", %{"resp" => gameName}
+    end
+    {:reply, {:ok, %{"game" => Game.client_view(game, turn)}}, socket}
 end
 
 def handle_in("click_bet_blind", %{"turn" => turn, "betValue" => betValue}, socket) do
