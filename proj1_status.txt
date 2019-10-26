@@ -1,35 +1,36 @@
-
-Web Dev Spring 2018 Project 1 Status
+Web Dev Fall 2019 Project 1 Status
 
 Answer the following questions:
 
 
 1. What are the names of the members of your team?
-
+Saurabh Bothra
+Gaurav Tripathi
 
 
 2. What's the URL of the github repo with your code for this project?
-
+https://github.com/tripathi-gaurav/teen-patti
 
 
 3. What is the URL(s) that you deployed to?
-
+teenpatti.saurabhbothra.xyz
 
 
 4. Is your app functionality complete? If not, what's missing?
-
+No.
 
 
 5. Is your app properly deployed? If not, what went wrong?
-
+Yes
 
 
 6. What parts of the project did each team member work on?
-
+Saurabh Bothra - elixir logic, react, report
+Gaurav Tripathi - react, canvas, refactoring
 
 
 7. Are all your third-party assets appropriately licensed and credited?
-
+Yes - creative common license
 
 
 And here's a list of tasks for grading comments. Just leave this here:
