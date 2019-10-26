@@ -53,15 +53,29 @@ class Table extends React.Component {
             player: {}
         };
 
-        this.channel
-            .join()
-            .receive("ok", resp => {
-                console.log("Successfully joined");
-                this.got_view(resp);
-            })
-            .receive("error", resp => {
-                console.log("Unable to join", resp);
-            });
+
+
+        if (this.player) {
+            this.channel
+                .join()
+                .receive("ok", resp => {
+                    console.log("Successfully joined");
+                    this.got_view(resp);
+                })
+                .receive("error", resp => {
+                    console.log("Unable to join", resp);
+                });
+        } else {
+            this.channel
+                .join()
+                .receive("ok", resp => {
+                    console.log("Successfully joined");
+                    this.got_view(resp);
+                })
+                .receive("error", resp => {
+                    console.log("Unable to join", resp);
+                });
+        }
         this.channel.on("refresh_view", resp => {
             console.log("refresh_view broadcast");
             this.refresh_view(resp);
@@ -342,41 +356,70 @@ class Table extends React.Component {
     }
 
     onClickShow() {
-        if (!this.state.isShow && this.state.listOfUsers.length == 2) {
-            this.channel
-                .push("change_show", { turn: this.state.turn })
-                .receive("ok", resp => {
-                    this.got_view(resp);
-                });
-            if (this.state.turn == 1) {
-                if (this.state.isSeenPlayer1) {
-                    this.channel
-                        .push("evaluate_show_seen", { turn: this.state.turn })
-                        .receive("ok", resp => {
-                            this.got_view(resp);
-                        });
-                } else {
-                    this.channel
-                        .push("evaluate_show_blind", { turn: this.state.turn })
-                        .receive("ok", resp => {
-                            this.got_view(resp);
-                        });
-                }
-            } else {
-                if (this.state.isSeenPlayer2) {
-                    this.channel
-                        .push("evaluate_show_seen", { turn: this.state.turn })
-                        .receive("ok", resp => {
-                            this.got_view(resp);
-                        });
-                } else {
-                    this.channel
-                        .push("evaluate_show_blind", { turn: this.state.turn })
-                        .receive("ok", resp => {
-                            this.got_view(resp);
-                        });
-                }
+        if (!this.state.isShow && this.state.listOfUsers.length >= 2) {
+            // this.channel
+            //     .push("change_show", { turn: this.state.turn })
+            //     .receive("ok", resp => {
+            //         this.got_view(resp);
+            //     });
+            let is_seen = this.state.player.is_seen;
+            let is_turn = this.state.player.is_turn;
+
+            if (!is_turn) {
+                alert("Not your turn.");
+                return;
             }
+            let list_of_players = this.players;
+            if (is_seen) {
+                let list_of_players = this.state.players;
+                for (let i = 0; i < list_of_players.length; i++) {
+                    if (!list_of_players[i].is_seen) {
+                        alert("Other player is blind. You can't call for show");
+                        return;
+                    }
+                }
+
+                this.channel
+                    .push("evaluate_show", { turn: this.state.player.session_id })
+                    .receive("ok", resp => {
+                        this.got_view(resp);
+                    });
+            } else {
+                this.channel
+                    .push("evaluate_show", { turn: this.state.player.session_id })
+                    .receive("ok", resp => {
+                        this.got_view(resp);
+                    });
+            }
+            // if (this.state.turn == 1) {
+            //     if (this.state.isSeenPlayer1 ) {
+            //         this.channel
+            //             .push("evaluate_show_seen", { turn: this.state.turn })
+            //             .receive("ok", resp => {
+            //                 this.got_view(resp);
+            //             });
+            //     } else {
+            //         this.channel
+            //             .push("evaluate_show_blind", { turn: this.state.turn })
+            //             .receive("ok", resp => {
+            //                 this.got_view(resp);
+            //             });
+            //     }
+            // } else {
+            //     if (this.state.isSeenPlayer2) {
+            //         this.channel
+            //             .push("evaluate_show_seen", { turn: this.state.turn })
+            //             .receive("ok", resp => {
+            //                 this.got_view(resp);
+            //             });
+            //     } else {
+            //         this.channel
+            //             .push("evaluate_show_blind", { turn: this.state.turn })
+            //             .receive("ok", resp => {
+            //                 this.got_view(resp);
+            //             });
+            //     }
+            // }
         }
     }
 
@@ -461,14 +504,12 @@ class Table extends React.Component {
             let curr_player = list_of_players[i];
             var _length = 3;    //curr_player.length
             for (var j = 0; j < _length; j++) {
-                if (curr_player.is_seen) {
+                if (curr_player.is_seen && curr_player.hand != null && curr_player.hand.length > 0) {
                     cards.push(this.render_cards_for_user(curr_player.hand[j].type, curr_player.hand[j].value, my_x + (j * 50), pos_y + 110));
                 } else {
                     cards.push(this.render_cards_for_user("Background", "Black", my_x + (j * 10), pos_y + 110));
                 }
             }
-
-
 
             //userName.push(this.render_text("U:" + userName, my_x, pos_y + 210));
             moolah.push(this.render_text("Amount: $" + curr_player.money_available, my_x, pos_y + 220));

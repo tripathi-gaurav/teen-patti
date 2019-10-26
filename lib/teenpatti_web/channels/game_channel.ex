@@ -162,6 +162,16 @@ def handle_in("change_show", %{"turn" => turn}, socket) do
     {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
 end
 
+def handle_in("evaluate_show", %{"turn" => turn}, socket) do
+    gameName = socket.assigns[:gameName]
+    #game = Game.evaluate_show(socket.assigns[:game], turn)
+    game = BackupAgent.get( gameName )
+    game = Game.evaluate_show(game, turn)
+    socket = assign(socket, :game, game)
+    BackupAgent.put(gameName, game)
+    {:reply, {:ok, %{"game" => Game.final_client_view(game, turn)}}, socket}
+end
+
 def handle_in("evaluate_show_seen", %{"turn" => turn}, socket) do
     gameName = socket.assigns[:gameName]
     game = Game.evaluate_show_seen(socket.assigns[:game], turn)

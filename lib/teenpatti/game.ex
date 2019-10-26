@@ -790,6 +790,69 @@ def assign_cards_to_blind(handForPlayer) do
      handForPlayer
 end
 
+def evaluate_show(game, turn) do
+	players = game.internal_all_players
+	player = Map.fetch! players, turn #player1
+
+	handForPlayer1 = player.hand
+
+		money = player.money_available
+		#charge the caller the bet amount
+		money = if player.is_seen do
+			money - 2 * game.currentStakeAmount
+		else
+			money - game.currentStakeAmount
+		end
+		
+		player = Map.put player, :money_available, money
+
+		keys = Map.keys players
+		index_of_player = get_index_of_player_using_key( keys, turn )
+		#retreive next key
+		
+		session_id_of_next_player = if ( index_of_player == length(keys)-1 ) do
+			Enum.at keys, 0
+		else
+			Enum.at keys, index_of_player+1
+		end
+		next_player = Map.fetch! players, session_id_of_next_player #player2
+
+		handForPlayer2 = next_player.hand
+
+		message = check_winner(handForPlayer1, handForPlayer2)
+		# message content? 
+		IO.puts message
+		{winning_player, losing_player} = if String.contains? message, "Player1" do
+														{ player, next_player }
+													else
+														{ next_player, player }
+													end
+
+	
+	{winning_player, losing_player, money_available} = if player.is_seen do
+		#evaluate for seen
+		
+		#either case..winning players money_avail increases 
+		# money with winner
+		money_available = game.potMoney + 2 * game.currentStakeAmount + winning_player.money_available
+		{winning_player, losing_player, money_available}
+		
+	else
+		#evaluate for blind
+		money_available = game.potMoney + game.currentStakeAmount + winning_player.money_available
+		{winning_player, losing_player, money_available}
+	end
+
+		winning_player = Map.put winning_player, :money_available, money_available
+		winning_player = %Player{winning_player | is_seen: true}
+		losing_player = %Player{losing_player | is_seen: true}
+		temp_id = Map.fetch! winning_player, :session_id
+		id_of_losing_player = Map.fetch! losing_player, :session_id
+		players = players 	|> Map.put(temp_id, winning_player)
+							|> Map.put(id_of_losing_player, losing_player)
+		game =  Map.put game, :internal_all_players, players
+		game = game |> Map.put :potMoney, 0
+end
 
 def evaluate_show_seen(game, turn) do
    handForPlayer2 = assign_cards_to_blind(game.handForPlayer2)
@@ -915,24 +978,12 @@ def assignCards(game, turn) do
 end
 
 def see_cards(game, session_id) do
-	#player = get_in game.players, [session_id]
-	#players = get_list_of_players(game, session_id)
-	#player = hd( Enum.filter( players, fn x -> x.session_id == session_id end ) )
-	#player = game.internal_all_players[session_id]
-	# IO.puts ">>>>>>>>>>>"
-	# IO.inspect game
-	# IO.puts ">>>>>>>>>>>"
+	
 	player = Map.fetch! game.internal_all_players, session_id
 	player = %{player | is_seen: true}
 	#Map.update_in game.internal_all_players, session_id, &()
 	players = update_in game.internal_all_players, [session_id], &(&1=player)
-	# players = Enum.map game.internal_all_players, fn {k,v} -> 
-	# 					if k == session_id do
-	# 						player
-	# 					else
-	# 						x
-	# 					end
-	# 				end
+	
 	
 	# IO.puts "-----$$$$$------"
 	# IO.inspect players
@@ -966,11 +1017,7 @@ def client_view(game, session_id) do
 	else
 		player = hd( Enum.filter( players, fn x -> x.session_id == session_id end ) )
 	end
-	#player = %Player{player | is_seen}
-	#IO.puts "==========FINAL============="
-	#IO.inspect players
-	#IO.puts "============================="
-	#update_in players, [session_id], &(&1=player)
+	
 	game = %{game | players: players, player: player}
 	# IO.inspect "~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 	# IO.inspect game
@@ -981,8 +1028,53 @@ def client_view(game, session_id) do
 end
 
 def final_client_view(game, session_id) do
+	players = get_list_of_players(game, session_id)
+	
+	map_of_players = game.internal_all_players #game.players
+	players = Enum.map map_of_players, fn {k, v} -> 
+	if k == session_id do
+	%Teenpatti.Player{ 
+			user_name: v.user_name, 
+			money_available: v.money_available,
+			is_show: v.is_show,
+			is_seen: v.is_seen,
+			is_turn: v.is_turn,
+			session_id: v.session_id,
+			hand: v.hand
+			}
+	else
+	%Teenpatti.Player{ 
+			user_name: v.user_name, 
+			money_available: v.money_available,
+			is_show: v.is_show,
+			is_seen: v.is_seen,
+			is_turn: v.is_turn,
+			hand: v.hand
+			}
+	end
+	end
 
+	dummy = game.players
+	dummy = unless is_list dummy do
+		get_list_of_players(game, session_id)
+	end
+	game = %{game | players: dummy}
+	
+	player = if length( players ) == 0 do
+		player = %Player{}
+	else
+		player = hd( Enum.filter( players, fn x -> x.session_id == session_id end ) )
+	end
+	
+	game = %{game | players: players, player: player}
+	# IO.inspect "~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	# IO.inspect game
+	# IO.inspect "~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	game = Map.drop(game, [:internal_all_players] )
+	game
 end
+
+
 
 def get_list_of_players(game, session_id) do
 	map_of_players = game.internal_all_players #game.players
@@ -1004,7 +1096,8 @@ def get_list_of_players(game, session_id) do
 	else
 		%Teenpatti.Player{ 
 			user_name: v.user_name, 
-			money_available: v.money_available  
+			money_available: v.money_available,
+			is_seen: v.is_seen  #we will have to build a separate client_view method for the case of show
 			} 
 	end
 	end
