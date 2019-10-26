@@ -30,16 +30,11 @@ h is the lowest.
  is the highest straight run. Next comes A-K-Q, 2-A-K, K-Q-J and so on down to 4
 -3-2, which is the lowest.
 - **Color flush:**  Three cards from the same suit. Ties are resolved by the fir
-st high card. If all card values are same, then suits are ranked from Spades \&g
-t; Diamond \&gt; Heart \&gt; Clubs.
+st high card.
 - **Pair:**  Two cards of the same value. Pair with higher rank dominates. If a
-tie still exists, then the value of third card decides the winner. If the game i
-s still tied, ranking of suits determines the winner (Spades \&gt; Diamond \&gt;
- Heart \&gt; Clubs).
+tie still exists, then the value of third card decides the winner.
 - **High card:**  First card with highest value determines the winner. If equal,
  then second high card is compared. If equal, then third high card is compared.
-If the game is tied, then ranking of card suit determines the winner (Spades \&g
-t; Diamond \&gt; Heart \&gt; Clubs).
 
 Below are definitions for some of the varying rules for our implementation:
 
@@ -196,7 +191,8 @@ then he can press the **fold** button and back out from this round. The game wil
 l continue until two are left on the table. After that, any of the two players c
 an call for a show by pressing the **show** button and the appropriate winner wi
 ll be displayed based on the ranking of the hands. Also the pot money will be ad
-ded to the winner&#39;s money balance.
+ded to the winner&#39;s money balance. We have also implemented a chatbox where 
+players can interact with each other.
 
 **Challenges and Solutions**
 

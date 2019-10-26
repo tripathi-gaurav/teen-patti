@@ -14,10 +14,12 @@ https://github.com/tripathi-gaurav/teen-patti
 
 3. What is the URL(s) that you deployed to?
 teenpatti.saurabhbothra.xyz
+teenpatti.webassembly.site
 
 
 4. Is your app functionality complete? If not, what's missing?
-No.
+Yes, we have covered the app functionality. However, some of the tasks
+from the stretch goals are not completed.
 
 
 5. Is your app properly deployed? If not, what went wrong?
@@ -26,7 +28,7 @@ Yes
 
 6. What parts of the project did each team member work on?
 Saurabh Bothra - elixir logic, react, report
-Gaurav Tripathi - react, canvas, refactoring
+Gaurav Tripathi - react, canvas, refactoring of elixir logic
 
 
 7. Are all your third-party assets appropriately licensed and credited?
