@@ -49,7 +49,8 @@ class Table extends React.Component {
             message1: "",
             message2: "",
             list_of_players: [],
-            players: []
+            players: [],
+            player: {}
         };
 
         this.channel

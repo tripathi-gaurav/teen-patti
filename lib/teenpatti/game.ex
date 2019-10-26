@@ -62,18 +62,40 @@ def addUserToMap(game, userName) do
      end
 end
 
+def update_money( map, session_id ) do
+	player = Map.fetch! map, session_id
+	money = player.money_available - 10
+	player = %Player{player | money_available: money}
+	player
+end
+
+def update_internal_map( map, [ hd | tl] ) do
+  player = update_money( map, hd )
+  m = Map.put map, hd, player
+  update_internal_map m, tl
+end
+
+def update_internal_map( map, _ ) do
+  map
+end
+
 def start_game(game) do
 	num_of_players = Enum.count game.players
 	IO.puts num_of_players
+	IO.puts "<<<<<<<<<<<"
+	IO.inspect game
+	IO.puts "<<<<<<<<<<<"
 	if num_of_players >= 2 do
 		pot_money = game.potMoney + num_of_players * game.currentStakeAmount
-		players = Enum.map game.internal_all_players, fn {k,v} -> 
-											money_available = v.money_available - game.currentStakeAmount
-											{k, %Teenpatti.Player{v | money_available: money_available} } 
-										end
-		IO.puts "pot_money: #{pot_money}"
+		keys = Map.keys( game.internal_all_players )
+		map = update_internal_map( game.internal_all_players, keys )
+		# players = Enum.map game.internal_all_players, fn {k,v} -> 
+		# 									money_available = v.money_available - game.currentStakeAmount
+		# 									{k, %Teenpatti.Player{v | money_available: money_available} } 
+		# 								end
 		
-		%{game | internal_all_players: players, potMoney: pot_money}
+		IO.puts "pot_money: #{pot_money}"
+		%{game | internal_all_players: map, potMoney: pot_money}
 	else
 		game
 	end
@@ -874,6 +896,9 @@ def see_cards(game, session_id) do
 	#players = get_list_of_players(game, session_id)
 	#player = hd( Enum.filter( players, fn x -> x.session_id == session_id end ) )
 	#player = game.internal_all_players[session_id]
+	IO.puts ">>>>>>>>>>>"
+	IO.inspect game
+	IO.puts ">>>>>>>>>>>"
 	player = Map.fetch! game.internal_all_players, session_id
 	player = %{player | is_seen: true}
 	#Map.update_in game.internal_all_players, session_id, &()
