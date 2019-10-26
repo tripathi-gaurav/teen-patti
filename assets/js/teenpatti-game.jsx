@@ -81,9 +81,9 @@ class Table extends React.Component {
             this.refresh_view(resp);
         });
 
-        this.channel.on("start_game", resp => {
-            console.log("start_game broadcast");
-            this.refresh_view(resp);
+        this.channel.on("final_view", resp => {
+            console.log("final_view broadcast");
+            this.refresh_view_final(resp);
         });
         // this.state = {
         //   balls: [
@@ -213,6 +213,20 @@ class Table extends React.Component {
         if (this.state.player.session_id != "") {
             this.channel
                 .push("refresh_view", { userName: this.state.player.session_id, gameName: view.resp })
+                .receive("ok", resp => {
+                    console.log(" refresh: " + resp);
+                    this.got_view(resp.game);
+                });
+        }
+    }
+
+    refresh_view_final(view) {
+        console.log(view);
+        console.log("session_id: " + this.state.player.session_id); //hash of userName
+
+        if (this.state.player.session_id != "") {
+            this.channel
+                .push("refresh_view_final", { userName: this.state.player.session_id, gameName: view.resp })
                 .receive("ok", resp => {
                     console.log(" refresh: " + resp);
                     this.got_view(resp.game);

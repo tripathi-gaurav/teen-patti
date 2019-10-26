@@ -40,13 +40,23 @@ def handle_in("join_game", %{"userName" => userName}, socket) do
 end  
 
 def handle_in("refresh_view", %{"userName" => userName, "gameName" => gameName}, socket) do
-    IO.puts "&&&&&&&&&&&&&&&&&&&&&&&&&&&& #{gameName} #{userName}"
+    IO.puts "refresh_view: #{gameName} #{userName}"
     
     game = socket.assigns[:game]
     game = BackupAgent.get( gameName )
     socket = assign(socket, :game, game)
     
     {:reply, {:ok, %{"game" => Game.client_view(game, userName)}}, socket}
+end
+
+def handle_in("refresh_view_final", %{"userName" => userName, "gameName" => gameName}, socket) do
+    IO.puts "refresh_view_final: #{gameName} #{userName}"
+    
+    game = socket.assigns[:game]
+    game = BackupAgent.get( gameName )
+    socket = assign(socket, :game, game)
+    
+    {:reply, {:ok, %{"game" => Game.final_client_view(game, userName)}}, socket}
 end
 
 def handle_in("start_game", %{"userName" => userName}, socket) do
@@ -89,7 +99,7 @@ def handle_in("reset_game", %{}, socket) do
     #game = Game.reset_game(socket.assigns[:game])
     socket = assign(socket, :game, game)
     BackupAgent.put(gameName, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+    {:reply, {:ok, %{"game" => Game.final_client_view(game)}}, socket}
 end
 
 
@@ -108,22 +118,7 @@ def handle_in("click_bet_seen", %{"turn" => turn, "betValue" => betValue}, socke
     {:reply, {:ok, %{"game" => Game.client_view(game, turn)}}, socket}
 end
 
-def handle_in("click_bet_blind", %{"turn" => turn, "betValue" => betValue}, socket) do
-    gameName = socket.assigns[:gameName]
-    game = Game.onClickBetBlind(socket.assigns[:game], turn, betValue)
-    IO.inspect game
-    socket = assign(socket, :game, game)
-    BackupAgent.put(gameName, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
-end
 
-def handle_in("change_seen", %{"turn" => turn}, socket) do
-    gameName = socket.assigns[:gameName]
-    game = Game.changeSeen(socket.assigns[:game], turn)
-    socket = assign(socket, :game, game)
-    BackupAgent.put(gameName, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
-end
 
 def handle_in("see_cards", %{"userName" => session_id}, socket) do
     gameName = socket.assigns[:gameName]
@@ -137,15 +132,6 @@ def handle_in("see_cards", %{"userName" => session_id}, socket) do
     {:reply, {:ok, %{"game" => Game.client_view(game, session_id)}}, socket}
 end
 
-# TODO: remove since see_cards should replace this
-def handle_in("assign_cards", %{"turn" => turn}, socket) do
-    gameName = socket.assigns[:gameName]
-    game = Game.assignCards(socket.assigns[:game], turn)
-    socket = assign(socket, :game, game)
-    BackupAgent.put(gameName, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
-end
-
 def handle_in("click_fold", %{"turn" => turn}, socket) do
     gameName = socket.assigns[:gameName]
     game = Game.click_fold(socket.assigns[:game], turn)
@@ -154,13 +140,7 @@ def handle_in("click_fold", %{"turn" => turn}, socket) do
     {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
 end
 
-def handle_in("change_show", %{"turn" => turn}, socket) do
-    gameName = socket.assigns[:gameName]
-    game = Game.change_show(socket.assigns[:game], turn)
-    socket = assign(socket, :game, game)
-    BackupAgent.put(gameName, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
-end
+
 
 def handle_in("evaluate_show", %{"turn" => turn}, socket) do
     gameName = socket.assigns[:gameName]
@@ -169,24 +149,12 @@ def handle_in("evaluate_show", %{"turn" => turn}, socket) do
     game = Game.evaluate_show(game, turn)
     socket = assign(socket, :game, game)
     BackupAgent.put(gameName, game)
+    
+    x = broadcast socket, "final_view", %{"resp" => gameName}
     {:reply, {:ok, %{"game" => Game.final_client_view(game, turn)}}, socket}
 end
 
-def handle_in("evaluate_show_seen", %{"turn" => turn}, socket) do
-    gameName = socket.assigns[:gameName]
-    game = Game.evaluate_show_seen(socket.assigns[:game], turn)
-    socket = assign(socket, :game, game)
-    BackupAgent.put(gameName, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
-end
 
-def handle_in("evaluate_show_blind", %{"turn" => turn}, socket) do
-    gameName = socket.assigns[:gameName]
-    game = Game.evaluate_show_blind(socket.assigns[:game], turn)
-    socket = assign(socket, :game, game)
-    BackupAgent.put(gameName, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
-end
 
 defp authorized?( _payload ) do
         true
