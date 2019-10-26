@@ -69,6 +69,15 @@ def addUserToMap(game, userName) do
      end
 end
 
+def assign_cards_to_blind(handForPlayer) do
+     if(length(handForPlayer) != 0) do
+             handForPlayer
+     end
+     listOfMapOfCards = getListOfCards()
+     handForPlayer = Enum.slice(listOfMapOfCards, 3..5)
+     handForPlayer
+end
+
 def update_money( map, session_id, amt ) do
 	player = Map.fetch! map, session_id
 	money = player.money_available - amt
@@ -180,113 +189,32 @@ def onClickBetSeen(game, turn, betValue) do
 
 end
 
-def onClickBetBlind(game, turn, betValue) do
-    if(turn == 1) do
-          potMoney= game.potMoney + betValue
-          currentStakeAmount = betValue
-          moneyPlayer1 = game.moneyPlayer1 - betValue
-          isBetPlayer1 = false
-          isBetPlayer2 = true
-          turn = 2
-       
-          %{ game | potMoney: potMoney,
-                    currentStakeAmount: currentStakeAmount,
-                    moneyPlayer1: moneyPlayer1,
-                    isBetPlayer1: isBetPlayer1,
-                    isBetPlayer2: isBetPlayer2,
-                    turn: turn
-          }
-    else
-          potMoney= game.potMoney + betValue
-          currentStakeAmount = betValue
-          moneyPlayer2 = game.moneyPlayer2 - betValue
-          isBetPlayer1 = true
-          isBetPlayer2 = false
-          turn = 1
-       
-          %{ game | potMoney: potMoney,
-                    currentStakeAmount: currentStakeAmount,
-                    moneyPlayer2: moneyPlayer2,
-                    isBetPlayer1: isBetPlayer1,
-                    isBetPlayer2: isBetPlayer2,
-                    turn: turn
-          }
-    end
-end
-
-def changeSeen(game, turn) do
-    if(turn == 1) do
-          userName = ""
-          isGameActive = true
-          isBetPlayer1 = true
-          isSeenPlayer1 = true
-          turn = 1
-               
-          %{game |   userName: userName, 
-               isGameActive: isGameActive,
-               isBetPlayer1: isBetPlayer1, 
-               isSeenPlayer1: isSeenPlayer1,
-               turn: turn
-          }
-    else
-          userName = ""
-          isGameActive = true
-          isBetPlayer2 = true
-          isSeenPlayer2 = true
-          turn = 2
-          %{ game |  userName: userName, 
-                         isGameActive: isGameActive, 
-                         #isBetPlayer1: isBetPlayer1, 
-                         isBetPlayer2: isBetPlayer2, 
-                         turn: turn
-          }
-    end
-end
-
 def click_fold(game, turn) do
-   if turn == 1 do
-          userName = ""
-          potMoney = 0
-          turn = 0
-          message2 = "Congratulations! You won this round!"
-          moneyPlayer2 = game.moneyPlayer2 + game.potMoney
-          %{
-             game | userName: userName,
-                    potMoney: potMoney,
-                    turn: turn,
-                    message2: message2,
-                    moneyPlayer2: moneyPlayer2
-          }
-   else
-          userName = ""
-          potMoney = 0
-          turn = 0
-          message1 = "Congratulations! You won this round!"
-          moneyPlayer1 = game.moneyPlayer1 + game.potMoney
-          %{ game | userName: userName,
-                    potMoney: potMoney,
-                    turn: turn,
-                    message1: message1,
-                    moneyPlayer1: moneyPlayer1
-          }   
-   end
+
+	players = game.internal_all_players
+	player = Map.fetch! players, turn #player1
+
+	keys = Map.keys players
+		index_of_player = get_index_of_player_using_key( keys, turn )
+		#retreive next key
+		
+		session_id_of_next_player = if ( index_of_player == length(keys)-1 ) do
+			Enum.at keys, 0
+		else
+			Enum.at keys, index_of_player+1
+		end
+		next_player = Map.fetch! players, session_id_of_next_player #player2
+		money = game.potMoney + next_player.money_available
+		next_player = Map.put next_player, :money_available, money
+		winner_name = next_player.user_name
+		message = "#{winner_name} has won the round."
+		potMoney = 0
+		players = players |> Map.put(turn, player) |> Map.put(session_id_of_next_player, next_player)
+		game =  Map.put game, :internal_all_players, players
+		game = game |> Map.put :potMoney, 0
+		game = game |> Map.put :message1, message
 end
 
-def change_show(game, turn) do
-   %{ game | userName: "", isShow: true }
-end
-
-
-
-
-def assign_cards_to_blind(handForPlayer) do
-     if(length(handForPlayer) != 0) do
-             handForPlayer
-     end
-     listOfMapOfCards = getListOfCards()
-     handForPlayer = Enum.slice(listOfMapOfCards, 3..5)
-     handForPlayer
-end
 
 def evaluate_show(game, turn) do
 	players = game.internal_all_players
@@ -326,6 +254,7 @@ def evaluate_show(game, turn) do
 														{ next_player, player }
 													end
 
+		
 	
 	{winning_player, losing_player, money_available} = if player.is_seen do
 		#evaluate for seen
@@ -340,8 +269,9 @@ def evaluate_show(game, turn) do
 		money_available = game.potMoney + game.currentStakeAmount + winning_player.money_available
 		{winning_player, losing_player, money_available}
 	end
-
-		winning_player = Map.put winning_player, :money_available, money_available
+		message = "#{winning_player.user_name} has won the round!" 
+		winning_player = Map.put(winning_player, :money_available, money_available) 
+		winning_player = Map.put winning_player, :is_turn, true
 		winning_player = %Player{winning_player | is_seen: true}
 		losing_player = %Player{losing_player | is_seen: true}
 		temp_id = Map.fetch! winning_player, :session_id
@@ -350,6 +280,7 @@ def evaluate_show(game, turn) do
 							|> Map.put(id_of_losing_player, losing_player)
 		game =  Map.put game, :internal_all_players, players
 		game = game |> Map.put :potMoney, 0
+		game = game |> Map.put :message1, message
 end
 
 

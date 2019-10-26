@@ -85,15 +85,6 @@ class Table extends React.Component {
             console.log("final_view broadcast");
             this.refresh_view_final(resp);
         });
-        // this.state = {
-        //   balls: [
-        //     { x: 100, y: 700, dx: 0, dy: -1 },
-        //     { x: 200, y:0, dx: 0, dy: -1 },
-        //     { x: 300, y: 750, dx: 0, dy: -1 }
-        //   ]
-        // };
-
-        //window.setInterval(this.tick.bind(this), 50);
     }
 
 
@@ -156,8 +147,21 @@ class Table extends React.Component {
         />);
     }
 
+    render_text_with_on_click(text, x, y) {
+        return (<Text
+            x={x}
+            y={y}
+            text={text}
+            fontFamily={'Calibri'}
+            fontSize={18}
+            align={'center'}
+            onClick={() => this.handle_click(text)}
+
+        />);
+    }
+
     render_rect_with_on_click(label, x, y, color) {
-        var text = this.render_text(label, x + 50, y + 15);
+        var text = this.render_text_with_on_click(label, x + 50, y + 15);
         let border = (<Rect
             x={x}
             y={y}
@@ -232,30 +236,26 @@ class Table extends React.Component {
                     this.got_view(resp.game);
                 });
         }
-
-
     }
 
     got_view(view) {
         console.log("new view", view);
         if (view.game) {
             this.setState(view.game);
+            if (view.game.message1 != "") {
+                alert(view.game.message1);
+            }
         } else {
             console.log("directly setting the state");
             this.setState(view);
+            if (view.message1 != "") {
+                alert(game.message1);
+            }
         }
     }
 
     handleChange(value) {
         this.setState({ userName: value });
-    }
-
-    handleBetForPlayer1(value) {
-        this.setState({ betValuePlayer1: parseInt(value) });
-    }
-
-    handleBetForPlayer2(value) {
-        this.setState({ betValuePlayer2: parseInt(value) });
     }
 
     onClickJoinGameButton() {
@@ -267,17 +267,24 @@ class Table extends React.Component {
     }
 
     startGame() {
+        if (this.state.potMoney > 0) {
+            alert("Game already on");
+            return;
+        }
         this.channel.push("start_game", { userName: this.state.player.session_id }).receive("ok", resp => {
             this.got_view(resp);
         });
     }
 
     onClickSeen() {
-        // this.channel
-        //     .push("change_seen", { turn: this.state.turn })
-        //     .receive("ok", resp => {
-        //         this.got_view(resp);
-        //     });
+        if (this.state.potMoney == 0) {
+            alert("Game not started. First click start.");
+            return;
+        }
+        if (!this.state.player.is_turn) {
+            alert("Not your turn. ");
+            return;
+        }
         let turn = this.state.player.session_id;
         console.log("seeing cards: " + turn);
         this.channel
@@ -285,14 +292,14 @@ class Table extends React.Component {
             .receive("ok", resp => {
                 this.got_view(resp);
             });
-        // this.channel
-        //     .push("assign_cards", { turn: this.state.turn })
-        //     .receive("ok", resp => {
-        //         this.got_view(resp);
-        //     });
+
     }
 
     onClickBet() {
+        if (this.state.potMoney == 0) {
+            alert("Game not started. First click start.");
+            return;
+        }
         let bet_amount = parseInt(document.getElementById("tb2").value);
         let _user_session = this.state.player.session_id;
         console.log("betting user: " + _user_session);
@@ -338,8 +345,16 @@ class Table extends React.Component {
     }
 
     onClickFold() {
+        if (this.state.potMoney == 0) {
+            alert("Game not started. First click start.");
+            return;
+        }
+        if (!this.state.player.is_turn) {
+            alert("Not your turn. ");
+            return;
+        }
         this.channel
-            .push("click_fold", { turn: this.state.turn })
+            .push("click_fold", { turn: this.state.player.session_id })
             .receive("ok", resp => {
                 this.got_view(resp);
             });
@@ -370,6 +385,10 @@ class Table extends React.Component {
     }
 
     onClickShow() {
+        if (this.state.potMoney == 0) {
+            alert("Game not started. First click start.");
+            return;
+        }
         if (!this.state.isShow && this.state.listOfUsers.length >= 2) {
             // this.channel
             //     .push("change_show", { turn: this.state.turn })
@@ -405,35 +424,7 @@ class Table extends React.Component {
                         this.got_view(resp);
                     });
             }
-            // if (this.state.turn == 1) {
-            //     if (this.state.isSeenPlayer1 ) {
-            //         this.channel
-            //             .push("evaluate_show_seen", { turn: this.state.turn })
-            //             .receive("ok", resp => {
-            //                 this.got_view(resp);
-            //             });
-            //     } else {
-            //         this.channel
-            //             .push("evaluate_show_blind", { turn: this.state.turn })
-            //             .receive("ok", resp => {
-            //                 this.got_view(resp);
-            //             });
-            //     }
-            // } else {
-            //     if (this.state.isSeenPlayer2) {
-            //         this.channel
-            //             .push("evaluate_show_seen", { turn: this.state.turn })
-            //             .receive("ok", resp => {
-            //                 this.got_view(resp);
-            //             });
-            //     } else {
-            //         this.channel
-            //             .push("evaluate_show_blind", { turn: this.state.turn })
-            //             .receive("ok", resp => {
-            //                 this.got_view(resp);
-            //             });
-            //     }
-            // }
+
         }
     }
 
@@ -516,6 +507,7 @@ class Table extends React.Component {
             users.push(this.render_user(my_x, pos_y));
 
             let curr_player = list_of_players[i];
+            userName.push(this.render_text("U:" + curr_player.user_name, my_x, pos_y + 200));
             var _length = 3;    //curr_player.length
             for (var j = 0; j < _length; j++) {
                 if (curr_player.is_seen && curr_player.hand != null && curr_player.hand.length > 0) {
@@ -543,8 +535,8 @@ class Table extends React.Component {
             bet_button.push(this.render_rect_with_on_click("BET", my_x + 300, pos_y + 300, "#0b7ebc"));
             var start_btn = this.render_rect_with_on_click("Start Game", my_x, my_y, "#413fb5");
             var show_btn = this.render_rect_with_on_click("SHOW", my_x + 75, my_y + 75, "#f74b38");
-            var pot_amt_btn = this.render_text("Pot Amount: $" + this.state.potMoney, my_x, my_y + 100);
-            var current_stake_amount = this.render_text("Current Stake Amount: $" + this.state.currentStakeAmount, my_x, my_y + 150);
+            var pot_amt_btn = this.render_text("Pot Amount: $" + this.state.potMoney, my_x + 310, my_y);
+            var current_stake_amount = this.render_text("Current Stake Amount: $" + this.state.currentStakeAmount, my_x + 310, my_y + 50);
         }
         var reset_btn = this.render_rect_with_on_click("Reset", my_x + 150, my_y, "#f74b38");
 
@@ -567,7 +559,7 @@ class Table extends React.Component {
 
                 <div>
                     <Stage width={W} height={H}>
-                        <Layer>{table}{users}{cards}{userName}
+                        <Layer>{table}{users}{userName}{cards}
                             {moolah}{fold_buttons}{seen_buttons}{bet_button}
                             {message_text}
                             {start_btn}
@@ -582,15 +574,9 @@ class Table extends React.Component {
                 <input
                     id="tb2"
                     type="text"
-                //value={this.state.betValuePlayer1}
-                //onChange={e => this.handleBetForPlayer1(e.target.value)}
+                    placeholder="enter bet amount here"
                 />
-                <input
-                    id="tb3"
-                    type="text"
-                    value={this.state.betValuePlayer2}
-                    onChange={e => this.handleBetForPlayer2(e.target.value)}
-                />
+
 
             </div>
 
