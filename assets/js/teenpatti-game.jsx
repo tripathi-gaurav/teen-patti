@@ -62,7 +62,12 @@ class Table extends React.Component {
                 console.log("Unable to join", resp);
             });
         this.channel.on("refresh_view", resp => {
-            console.log("madarjaad");
+            console.log("refresh_view broadcast");
+            this.refresh_view(resp);
+        });
+
+        this.channel.on("start_game", resp => {
+            console.log("start_game broadcast");
             this.refresh_view(resp);
         });
         // this.state = {
@@ -188,12 +193,18 @@ class Table extends React.Component {
 
     refresh_view(view) {
         console.log(view);
-        this.channel
-            .push("refresh_view", { userName: this.state.player.session_id, gameName: view.resp })
-            .receive("ok", resp => {
-                console.log(" refresh: " + resp);
-                this.got_view(resp.game);
-            });
+        console.log("session_id: " + this.state.player.session_id); //hash of userName
+
+        if (this.state.player.session_id != "") {
+            this.channel
+                .push("refresh_view", { userName: this.state.player.session_id, gameName: view.resp })
+                .receive("ok", resp => {
+                    console.log(" refresh: " + resp);
+                    this.got_view(resp.game);
+                });
+        }
+
+
     }
 
     got_view(view) {
@@ -201,6 +212,7 @@ class Table extends React.Component {
         if (view.game) {
             this.setState(view.game);
         } else {
+            console.log("directly setting the state");
             this.setState(view);
         }
     }
@@ -226,7 +238,7 @@ class Table extends React.Component {
     }
 
     startGame() {
-        this.channel.push("start_game", {}).receive("ok", resp => {
+        this.channel.push("start_game", { userName: this.state.player.session_id }).receive("ok", resp => {
             this.got_view(resp);
         });
     }
@@ -237,10 +249,10 @@ class Table extends React.Component {
         //     .receive("ok", resp => {
         //         this.got_view(resp);
         //     });
-        let turn = this.state.userName;
+        let turn = this.state.player.session_id;
         console.log("seeing cards: " + turn);
         this.channel
-            .push("see_cards", { turn: turn })
+            .push("see_cards", { userName: this.state.player.session_id })
             .receive("ok", resp => {
                 this.got_view(resp);
             });

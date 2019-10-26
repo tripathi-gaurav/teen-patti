@@ -27,7 +27,8 @@ def new do
        message2: "",
        player: %Player{},
        players: %{},
-	   listOfPlayers: []
+	   listOfPlayers: [],
+	   internal_all_players: %{}	#map of session id to player struct
     }
 end
 
@@ -50,7 +51,8 @@ def addUserToMap(game, userName) do
 		  players = Map.put players, session_id, new_player
 		  IO.inspect players
 		  
-          game = %{game | listOfUsers: listUsers, players: players, player: new_player, userName: userName}
+          game = %{game | listOfUsers: listUsers, players: players, 
+		  player: new_player, userName: userName, internal_all_players: players}
 		  IO.puts "==============================="
 		  IO.inspect game
 		  IO.puts "==============================="
@@ -62,29 +64,19 @@ end
 
 def start_game(game) do
 	num_of_players = Enum.count game.players
+	IO.puts num_of_players
 	if num_of_players >= 2 do
 		pot_money = game.potMoney + num_of_players * game.currentStakeAmount
-		players = Enum.map game.players, fn {k,v} -> 
+		players = Enum.map game.internal_all_players, fn {k,v} -> 
 											money_available = v.money_available - game.currentStakeAmount
 											{k, %Teenpatti.Player{v | money_available: money_available} } 
 										end
-		%{game | players: players}
+		IO.puts "pot_money: #{pot_money}"
+		
+		%{game | internal_all_players: players, potMoney: pot_money}
+	else
+		game
 	end
-	game
-#   if (length(game.listOfUsers) >= 2 && !game.isGameActive && game.turn == 0) do
-#      potMoney = game.potMoney + (length(game.listOfUsers) * game.currentStakeAmount)
-#      moneyPlayer1 = game.moneyPlayer1 - game.currentStakeAmount
-#      moneyPlayer2 = game.moneyPlayer2 - game.currentStakeAmount
-#      isGameActive = true
-#      isBetPlayer1 = true
-#      turn = 1
-#      userName = ""
-#      %{game | potMoney: potMoney, moneyPlayer1: moneyPlayer1,
-#       moneyPlayer2: moneyPlayer2, isGameActive: isGameActive,
-#       turn: turn, userName: userName, isBetPlayer1: isBetPlayer1}
-#   else
-#      game
-#   end
 end
 
 
@@ -878,14 +870,30 @@ def assignCards(game, turn) do
 end
 
 def see_cards(game, session_id) do
-	player = get_in game.players, [session_id]
+	#player = get_in game.players, [session_id]
+	#players = get_list_of_players(game, session_id)
+	#player = hd( Enum.filter( players, fn x -> x.session_id == session_id end ) )
+	#player = game.internal_all_players[session_id]
+	player = Map.fetch! game.internal_all_players, session_id
 	player = %{player | is_seen: true}
-	#IO.puts "-----$$$$$------"
-	#IO.inspect player
-	#IO.puts "-----$$$$$------"
+	#Map.update_in game.internal_all_players, session_id, &()
+	players = update_in game.internal_all_players, [session_id], &(&1=player)
+	# players = Enum.map game.internal_all_players, fn {k,v} -> 
+	# 					if k == session_id do
+	# 						player
+	# 					else
+	# 						x
+	# 					end
+	# 				end
+	
+	IO.puts "-----$$$$$------"
+	IO.inspect players
+	IO.puts "-----$$$$$------"
+	IO.inspect player
+	IO.puts "-----$$$$$------"
 	%{game | player: player}
-	players = update_in game.players, [session_id], &(&1=player)
-	%{game | players: players}
+	#players = update_in game.players, [session_id], &(&1=player)
+	%{game | internal_all_players: players}
 end
 
 def client_view(game) do
@@ -895,18 +903,41 @@ end
 
 def client_view(game, session_id) do
 	players = get_list_of_players(game, session_id)
-	player = get_in game.players, [session_id]
+	dummy = game.players
+	dummy = unless is_list dummy do
+		get_list_of_players(game, session_id)
+	end
+	game = %{game | players: dummy}
+	IO.puts "!@#$%^&*()"
+	IO.inspect players
+	IO.puts "!@#$%^&*()"
+	#player = get_in game.players, [ session_id ]
+	#my_player = ( Enum.filter( players, fn x -> x.session_id == session_id end ) )
+	player = if length( players ) == 0 do
+		player = %Player{}
+	else
+		player = hd( Enum.filter( players, fn x -> x.session_id == session_id end ) )
+	end
 	#player = %Player{player | is_seen}
 	#IO.puts "==========FINAL============="
 	#IO.inspect players
 	#IO.puts "============================="
 	#update_in players, [session_id], &(&1=player)
-	%{game | players: players}
+	game = %{game | players: players, player: player}
+	# IO.inspect "~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	# IO.inspect game
+	# IO.inspect "~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	game = Map.drop(game, [:internal_all_players] )
+	game
+
+end
+
+def final_client_view(game, session_id) do
 
 end
 
 def get_list_of_players(game, session_id) do
-	map_of_players = game.players
+	map_of_players = game.internal_all_players #game.players
 	players = Enum.map map_of_players, fn {k, v} -> 
 	IO.puts k
 	IO.puts session_id
