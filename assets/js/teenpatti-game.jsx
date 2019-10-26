@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import _ from "lodash";
 import { Stage, Layer, Rect, Image, Text } from "react-konva";
 import useImage from 'use-image';
+import $ from 'jquery'
 
 export default function game_init(root, channel) {
     ReactDOM.render(<Table channel={channel} />, root);
@@ -79,6 +80,11 @@ class Table extends React.Component {
         this.channel.on("refresh_view", resp => {
             console.log("refresh_view broadcast");
             this.refresh_view(resp);
+        });
+
+        this.channel.on("chat", resp => {
+            console.log("chat broadcast");
+            this.chat_arrived(resp.message);
         });
 
         this.channel.on("final_view", resp => {
@@ -224,6 +230,16 @@ class Table extends React.Component {
         }
     }
 
+    chat_arrived(resp) {
+        console.log("arrive: " + resp);
+        let chat_history = document.getElementById('chatBox').value;
+        console.log("history: " + chat_history);
+        document.getElementById('chatBox').value = chat_history + "\n" + resp;
+
+        //atribution: https://stackoverflow.com/questions/9170670/how-do-i-set-textarea-scroll-bar-to-bottom-as-a-default#9170709
+        var textarea = document.getElementById('chatBox');
+        textarea.scrollTop = textarea.scrollHeight;
+    }
     refresh_view_final(view) {
         console.log(view);
         console.log("session_id: " + this.state.player.session_id); //hash of userName
@@ -384,6 +400,19 @@ class Table extends React.Component {
         return "";
     }
 
+    onClickChat() {
+        let text = document.getElementById('txtChat').value;
+        if (text == "") {
+            return;
+        }
+        text = this.state.player.session_id + ": " + text
+        console.log(text);
+        this.channel.push("chat", { message: text }).receive("ok", resp => {
+            //this.got_view(resp);
+            console.log("resp for chat: " + resp);
+        });
+    }
+
     onClickShow() {
         if (this.state.potMoney == 0) {
             alert("Game not started. First click start.");
@@ -540,6 +569,22 @@ class Table extends React.Component {
         }
         var reset_btn = this.render_rect_with_on_click("Reset", my_x + 150, my_y, "#f74b38");
 
+
+        $(document).ready(function () {
+            //attribution: https://stackoverflow.com/questions/6542413/bind-enter-key-to-specific-button-on-page
+            $('#txtChat').show().unbind('keypress')
+            $('body').on('keypress', '#txtChat', function (args) {
+                if (args.keyCode == 13) {
+
+                    $('#btnChat').click();
+                    return;
+                }
+            });
+
+        });
+
+
+
         return (
             <div className="mainboard">
                 <div className="userList">
@@ -554,7 +599,7 @@ class Table extends React.Component {
                     <button className="b1" onClick={() => this.onClickJoinGameButton()}>
                         Join {window.gameName}
                     </button>
-                    <p>Following users joined successfully: {message}</p>
+                    <p>Players on this table: {message}</p>
                 </div>
 
                 <div>
@@ -577,6 +622,15 @@ class Table extends React.Component {
                     placeholder="enter bet amount here"
                 />
 
+                <fieldset>
+                    <label>Chat</label>
+                    <textarea id="chatBox" rows="1000" cols="100" />
+                    <input id="txtChat" type="text" placeholder="enter chat text here" />
+                </fieldset>
+
+                <button id="btnChat" onClick={() => this.onClickChat()}>
+                    Send chat message!
+                </button>
 
             </div>
 

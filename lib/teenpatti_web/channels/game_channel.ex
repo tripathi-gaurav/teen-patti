@@ -142,6 +142,23 @@ def handle_in("click_fold", %{"turn" => turn}, socket) do
     {:reply, {:ok, %{"game" => Game.client_view(game, turn)}}, socket}
 end
 
+def handle_in("chat", %{"message" => message}, socket) do
+    gameName = socket.assigns[:gameName]
+    game = BackupAgent.get( gameName )
+#   game = Game.chat(game, turn)
+    socket = assign(socket, :game, game)
+
+    #BackupAgent.put(gameName, game)
+    broadcast socket, "chat", %{message: message}
+    {:reply, {:ok, %{"game" => %{} }}, socket}
+end
+
+
+
+
+
+
+
 
 
 def handle_in("evaluate_show", %{"turn" => turn}, socket) do
