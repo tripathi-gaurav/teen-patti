@@ -1,5 +1,10 @@
 # Teenpatti [![Build Status](https://travis-ci.com/tripathi-gaurav/teen-patti.svg?branch=master)](https://travis-ci.com/tripathi-gaurav/teen-patti)
 
+![In-game image](./assets/images/game/Screenshot.png)
+
+- A three-card poker game from India.
+- Elixir-Phoenix in the backend with the front end in React and React-Konva.
+
 To start your Phoenix server:
 
 - Install dependencies with `mix deps.get`
